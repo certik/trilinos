@@ -1,0 +1,681 @@
+\documentclass[pdf,ps2pdf,11pt]{SANDreport}
+\usepackage{pslatex}
+
+%Local stuff
+\usepackage{graphicx}
+\usepackage{latexsym}
+\input{rab_commands}
+\newtheorem{theorem}{Theorem}
+
+% If you want to relax some of the SAND98-0730 requirements, use the "relax"
+% option. It adds spaces and boldface in the table of contents, and does not
+% force the page layout sizes.
+% e.g. \documentclass[relax,12pt]{SANDreport}
+%
+% You can also use the "strict" option, which applies even more of the
+% SAND98-0730 guidelines. It gets rid of section numbers which are often
+% useful; e.g. \documentclass[strict]{SANDreport}
+
+% ---------------------------------------------------------------------------- %
+%
+% Set the title, author, and date
+%
+
+\title{
+Trilinos CMake Evaluation
+}
+\author{Roscoe A. Bartlett}
+\date{}
+
+% ---------------------------------------------------------------------------- %
+% Set some things we need for SAND reports. These are mandatory
+%
+\SANDnum{SAND2008-xxx}
+\SANDprintDate{June 2008}
+\SANDauthor{Roscoe A. Bartlett}
+
+% ---------------------------------------------------------------------------- %
+% The following definitions are optional. The values shown are the default
+% ones provided by SANDreport.cls
+%
+\SANDreleaseType{Unlimited Release}
+%\SANDreleaseType{Not approved for release outside Sandia}
+
+% ---------------------------------------------------------------------------- %
+% The following definition does not have a default value and will not
+% print anything, if not defined
+%
+%\SANDsupersed{SAND1901-0001}{January 1901}
+
+% ---------------------------------------------------------------------------- %
+%
+% Start the document
+%
+\begin{document}
+\raggedright
+
+\maketitle
+
+% ------------------------------------------------------------------------ %
+% An Abstract is required for SAND reports
+%
+
+%
+\begin{abstract}
+%
+Autotools is terrible. We need something better.  How about CMake?
+%
+\end{abstract}
+%
+
+% ------------------------------------------------------------------------ %
+% An Acknowledgment section is optional but important, if someone made
+% contributions or helped beyond the normal part of a work assignment.
+% Use \section* since we don't want it in the table of context
+%
+%\clearpage
+%\section*{Acknowledgment}
+%The authors would like to thank ...
+%
+%The format of this report is based on information found
+%in~\cite{Sand98-0730}.
+%
+
+% ------------------------------------------------------------------------ %
+% The table of contents and list of figures and tables
+% Comment out \listoffigures and \listoftables if there are no
+% figures or tables. Make sure this starts on an odd numbered page
+%
+%\clearpage
+\tableofcontents
+%\listoffigures
+%\listoftables
+
+% ---------------------------------------------------------------------- %
+% An optional preface or Foreword
+%\clearpage
+%\section{Preface}
+%Although muggles usually have only limited experience with
+%magic, and many even dispute its existence, it is worthwhile
+%to be open minded and explore the possibilities.
+
+% ---------------------------------------------------------------------- %
+% An optional executive summary
+%\clearpage
+%\section{Summary}
+%Once a certain level of mistrust and scepticism has
+%been overcome, magic finds many uses in todays science
+%and engineering. In this report we explain some of the
+%fundamental spells and instruments of magic and wizardry. We
+%then conclude with a few examples on how they can be used
+%in daily activities at national Laboratories.
+
+% ---------------------------------------------------------------------- %
+% An optional glossary. We don't want it to be numbered
+%\clearpage
+%\section*{Nomenclature}
+%\addcontentsline{toc}{section}{Nomenclature}
+%\begin{itemize}
+%\item[alohomora]
+%spell to open locked doors and containers
+%\end{itemize}
+
+% ---------------------------------------------------------------------- %
+% This is where the body of the report begins; usually with an Introduction
+%
+\setcounter{secnumdepth}{3}
+\SANDmain % Start the main part of the report
+
+
+%
+\section{Build Capabilities and Features}
+%
+
+\begin{enumerate}
+
+{}\item Critical build features currently (at least partially) handled
+by the current autotools system:
+
+  \begin{enumerate}
+
+  {}\item Dependancy tracking of header files to rebuild object files
+
+    \begin{enumerate}
+
+    {}\item Autotools: Only supported on Linux and very few other
+    platforms.  Not support on the Sun, IBM, and SGI
+
+    {}\item CMake: Built into CMake so it will work on every platform,
+    period!
+
+    \end{enumerate}
+
+  {}\item Dependancy tracking of object files to rearcive libraries
+
+    \begin{enumerate}
+
+    {}\item Autotools: Fully supported?
+
+    {}\item CMake: Fully supported?
+
+    \end{enumerate}
+
+  {}\item Scalable build system where libraries and header directory
+  locations only defined once
+
+    \begin{enumerate}
+
+    {}\item Autotools: Export makefile system (with makefile
+    fragements Makefile.package.export) defines a single file where
+    these are things are defined.  Every test and example in Trilinos
+    (with a few shamefull exception) uses the export makefiles to get
+    all of these.  There is no duplication.
+
+    {}\item CMake: Chapter 7 in {}\cite{MasteringCMake_fourth}
+    describes a system would this should be well supported but it does
+    not appear the current Trilinos/CMake system has fully embraced
+    this.
+
+    \end{enumerate}
+
+  {}\item Circular depandancies allowed between tests/examples in
+  different packages
+
+    \begin{enumerate}
+
+    {}\item Why this is important: It is not clear where to put some
+    examples/tests what require multiple packages and there are
+    several cases of tests/examples that refer to libraries that build
+    later in the build tree.
+
+    {}\item Autotools: The default target for 'make' just builds
+    libraries and the 'tests', 'examples', and 'everthing' targets
+    make all libraries before any tests or examples are linked.  The
+    support for this with autotools is less than straightforward.
+
+    {}\item CMake: There does not seem to be any direct support for
+    this but perhaps this could be implemented in a clean way?
+
+    \end{enumerate}
+
+  {}\item Build system must be portable to all required platforms
+
+    \begin{enumerate}
+
+    {}\item Autotools: Autotools generates very portable makefiles.
+    However, avoiding ``commandline too long'' errors on many
+    platforms requires that one use GNU Make.
+
+    {}\item CMake: One needs to have cmake built on the target
+    platform but all that is needed to build and install cmake is a
+    fairly recent C++ compilers.  A simple 'configure', 'make',
+    'make install' is all that is needed.
+
+    \end{enumerate}
+
+  {}\item Must support multiple languages including Fortran 77,
+  Fortran 90, and Fortran 2003
+
+    \begin{enumerate}
+
+    {}\item Why this is important: ForTrilinos requires a very current
+    Fortran 90 compiler with some Fortran 2003 features.
+
+    {}\item Autotools: This is currently handled by setting by setting
+    'F90' to point to the fortran 90+ compiler when calling configure.
+
+    {}\item CMake: It is unclear how CMake support Fortran 90+ but
+    Chapter 11 in {}\cite{MasteringCMake_fourth} deals with how to add
+    new compilers so it seems this could be supported more cleanly
+    than with autotools.
+
+    \end{enumerate}
+
+  \end{enumerate}
+
+{}\item Critical build features not currently handled by the current
+autotools system:
+
+  \begin{enumerate}
+
+  {}\item Library to executable dependency tracking:
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Fast rebuild/retest cycles before
+    checkin and faster feedback from continuous integration tests
+    needs this.  Currently, it takes up to 50 minutes to relink all
+    the tests and examples in Trilinos.
+
+    {}\item Autotools: No support at all
+
+    {}\item CMake: This is built into CMake.  In my opinion (rabartl),
+    this is one of the major motivations for going to CMake.
+
+    \end{enumerate}
+
+  {}\item MS Windows support:
+
+    \begin{enumerate}
+
+    {}\item Why this is important: A big growth area for Trilinos is
+    Windows customers and the Tritan project requires this.
+
+    {}\item Autotools: No direct support but cygwin can be used with
+    Windows Intel compilers to install headers/libraries.  This is not
+    easy to set up and not very portable.
+
+    {}\item CMake: Direct support for MS Windows and a variety of
+    other systems.  This includes creating project files for Visual
+    Studio.  This is one of the major selling points for CMake over
+    the autotools system.
+
+    \end{enumerate}
+
+  \end{enumerate}
+
+{}\item Less-critical but desirable features not currently handled by
+the current autotools system:
+
+  \begin{enumerate}
+
+  {}\item Shared libraries:
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Some customers demand this.  Also,
+    shared libraries can allow for much faster rebuild cycles where
+    executables do not even need to be relinked after a dependant
+    library is rebuilt.  This can substantially speed up pre-checking
+    testing and shorten the feedback time from a continuous
+    integration server.
+
+    {}\item Autotools: Past attempts at using libtool have failed.
+    The Python-based system for creating shared libraries on Linux is
+    not well characterized.
+
+    {}\item CMake: Shared library support with CMake is advertised to
+    be very strong (see Section 4.8 in ``Mastering CMake: Fourth
+    Edition'').  Support for shared libraries with CMake in our
+    computing environment is unknown.
+
+    \end{enumerate}
+
+  {}\item Creation of export makefiles with compilers, compiler
+  options, include directories, libraries etc. to external clients:
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Building compatible client code
+    that will successfully link against Trilinos can be difficult to
+    do portabily in a manual way.  This feature is really only used by
+    second-tier customers (e.g. graduate students and other off
+    projects) as our major customers handle this differently.
+
+    {}\item Autotools: This is done by installing
+    Makefile.package.export and Makefile.package.export.macros in the
+    \$prefix/install directory.
+
+    {}\item CMake: This can be supported in some way with CMake and is
+    already being used for a project called 'lsalib'?
+
+    \end{enumerate}
+
+  {}\item Clean and undestandable mechanism for extending
+  functionality
+
+    \begin{enumerate}
+
+    {}\item Why this is important: We will need to create specialized
+    features form time to time and we need a supported way to do this
+    that is clean and understandable.
+
+    {}\item Autotools: Autotools uses M4 which has to be the most
+    confusing and hacked language ever designed in semi-modern times.
+    It is clear that M4 was hacked together as some wrapper for shell
+    scripting.
+
+    {}\item CMake: CMake has its own scripting language that is faily
+    general and faily compact.  It appears to be a full featured
+    language that would seem to be ``turning complete'' which includes
+    the ability to define lists and loops over those lists and create
+    arbitrary new functions (call macros).  The CMake scripting
+    language does seem to be a little too implicit for my liking.
+
+    \end{enumerate}
+
+  \end{enumerate}
+
+\end{enumerate}
+
+
+%
+\section{Testing and Reporting Capabilities and Features}
+%
+
+\begin{enumerate}
+
+{}\item Critical testing features currently (at least partically)
+handled by the current perl test harness:
+
+  \begin{enumerate}
+
+  {}\item Defining different tests with same executable but different
+  sets of test arguments:
+
+    \begin{enumerate}
+
+    {}\item Perl test harness: This is well supported and easy to do.
+
+    {}\item CMake/CTest: This is supported by the 'add\_test' command but is
+    not supported by the current CMake macro
+    TRILINOS\_ADD\_EXECUTABLE(...) but could be supported with a new
+    macro (like TRILINOS\_ADD\_TEST(...)).
+
+    \end{enumerate}
+
+  {}\item Selection of subsets of tests using keywords:
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Routine developer testing during
+    the development process requires the ability to run subsets of
+    tests easily.  Also, tests for individual packages need to be
+    selected individually.
+
+    {}\item Perl test harness: Full support for keywords and selecting
+    tests for individual packages is built in.
+
+    {}\item CMake/CTest: The TRILINOS\_ADD\_EXECUTABLE(...) macro add the
+    package name prefix to all tests (and exmaples) and you can use
+    'ctest -R (PACKAGE1|PACKAGE2|...)' to select any subset of package
+    tests to run.
+
+    \end{enumerate}
+
+  {}\item Separate archiving and reporting of test results for each
+  package:
+
+    \begin{enumerate}
+
+    {}\item Why this is important: It is important to create targeted
+    reults pages and email so that individual package developers can
+    focus on their own packages and not be distracted by errors from
+    other related packages.  This is something that SIERRA does *not*
+    have worked out and it is killing them.
+
+    {}\item Perl test harness: Handled very cleaning but there are
+    still some improvements to be made (e.g. a) listing of all
+    platforms run, b) email notifications)
+
+    {}\item CMake/CTest/CDash: ???
+
+    \end{enumerate}
+
+  {}\item Platform-specific tests:
+
+    \begin{enumerate}
+
+    {}\item Perl test harness: Handed with 'HOST' and 'X-HOST' options
+    in a very clean way.
+
+    {}\item CMake: No direct support but could be implemented using
+    CMake macros?
+
+    \end{enumerate}
+
+  \end{enumerate}
+
+{}\item Critical testing features not currently handled by the current
+perl test harness:
+
+  \begin{enumerate}
+
+  {}\item Code coverage
+
+    \begin{enumerate}
+
+    {}\item Why this is important: This is one of the most basic
+    metrics of code quality and of the completeness of tests
+
+    {}\item Perl test harness: Has been supported in the past but not
+    currently working.
+
+    {}\item CMake: Built-in support and run on many platforms by lots
+    of other groups.
+
+    \end{enumerate}
+
+  {}\item Memory usage testing (i.e. valgrind and/or purify)
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Memory usage errors in C/C++
+    continue to degrade the quality of our code and they tend to sit
+    dormant for long periods of time and don't cause major problems
+    until we really need our software to work.  This includes memory
+    leaks, accessing deleted memory, access memory with invalid
+    addresses, out-of-bounds errors, etc.
+
+    {}\item Perl test harness: Has been supported in the past but not
+    currently working.
+
+    {}\item CMake: Built-in support and run on many platforms by lots
+    of other groups.
+
+    \end{enumerate}
+
+  {}\item Automatic timeout of tests
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Hanging tests can freeze up the
+    test harness so that no results are sent at all and it requires a
+    lot of manual work to monitor this and to manually kill hanging
+    tests.  Every major test harness used by our APP customers have
+    support for this (e.g. Alegra, Charon, SIERRA, Xyce).
+
+    {}\item Perl test harness: Not currently supported
+
+    {}\item CMake: Currently supported with a '--test-timeout' option
+    to 'ctest'.  Not clear if this will work with MPI tests (unless we
+    can ensure that the MPI implementation will clean up processes
+    when it mpirun or mpiexec gets killed).
+
+    \end{enumerate}
+
+  \end{enumerate}
+
+{}\item Less-critical but desirable features not currently handled by
+the current perl test harness:
+
+  \begin{enumerate}
+
+  {}\item Performance testing
+
+    \begin{enumerate}
+
+    {}\item Perl test harness: No direct support but could be handled
+    with a special test category and run for optimized builds?
+
+    {}\item CMake: No direct support but could be handled
+
+    \end{enumerate}
+
+  {}\item Parallel running of (serial) tests:
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Running tests is parallel can
+    significantly speed up pre-checking testing and shorted the
+    feedback time from a continuous integration server
+
+    {}\item Perl test harness: No support
+
+    {}\item CMake: Planned to be added to the next major release of
+    CMake/CTest\footnote{
+
+List:       cmake
+Subject:    Re: [CMake] parallel builds for ctest
+From:       "Alan W. Irwin" <irwin () beluga ! phys ! uvic ! ca>
+Date:       2008-02-16 19:22:39
+Message-ID: Pine.LNX.4.60.0802161105280.4080 () ybpnyubfg ! ybpnyqbznva
+[Download message RAW]
+
+On 2008-02-16 12:38-0500 Bill Hoffman wrote:
+
+> [...]parallel ctest is on the todo list for this year.  Most likely  it 
+> will be ctest -j N.   We can not depend on the make system to do the parallel 
+> stuff, and ctest -j would be useful for all generators.
+
+That's excellent news!  The execution of the PLplot tests actually take
+about the same time to run as (non-parallel) building of PLplot itself. Now
+we are doing our builds in parallel, convenient parallel testing will be
+most welcome as well, and I look forward to trying out that new ctest
+functionality once you are ready.
+
+Alan
+} % End footnote
+
+    \end{enumerate}
+
+  {}\item PBS-type batch MPI testing:
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Scalability testing requires some
+    more substantial parallel clusters and this requires using a batch
+    system like PBS.  The test harness needs to support submitting
+    batch jobs of mpi runs and wait for the results to come back in an
+    efficient way.
+
+    {}\item Perl test harness: No support yet but some experimentation
+
+    {}\item CMake: Not directly supported by could be implemented in
+    the native CMake scripting language?
+
+    \end{enumerate}
+
+  {}\item Archiving all test outputs for sufficient period of time
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Complete test results are needed to
+    be able to diagnose failing tests.  Otherwise, you must manually
+    go to the platform, build the executable(s) and run the tests
+    manually.
+
+    {}\item Perl test harness: Currently, only stdout is captured and
+    saved and then only a limit of ??? bytes for each file
+
+    {}\item CMake/CTest/CDash: ???
+
+    \end{enumerate}
+
+  {}\item Allowing the specification of any arbitrary number of
+  programs and/or criteria to determine test success or failure
+
+    \begin{enumerate}
+
+    {}\item Why this is important: Complex tests require that you be
+    able to define ``success'' in a variety of ways.  Examples: a)
+    Greping an output file looking for a specific string, b) Checking
+    for a non-zero return value and a specific sting in stdout, c)
+
+    {}\item Perl test harness: The current Trilinos test harness only
+    allows you to run one script as the test or a single grep of the
+    console output.  There is also the compareOutput that is not
+    enough.
+
+    {}\item CMake/CTest: No direct support but you could define a
+    CMake macro in CTest to do this?
+
+    \end{enumerate}
+
+  \end{enumerate}
+
+\end{enumerate}
+
+
+
+%
+\section{Issues with the current Trilinos/CMake system}
+%
+
+\begin{enumerate}
+
+{}\item Build sytem Issues
+
+  \begin{enumerate}
+
+  {}\item 'Debug' configuration is not supported by current CMake
+  system in Trilinos
+
+  {}\item Circular dependancies between tests/examples and other
+  packages is not supported ... Default top-level 'make' must build
+  all libraries before building tests and examples ...
+
+  {}\item Build system is not scalable or use the
+  ``one-definition-rule'' ... There is lots of redundancy in library
+  names, include paths, etc. ...
+
+  {}\item There is a lot of logic in the top-level CMakeList.txt file
+  that looks like might be better distributed into the various
+  package's CMakeLists.txt files ...
+
+  {}\item There is way too much clutter in the CMakeList.txt for tests
+  and examples to handle MPI and other issues ... We need to be able
+  to just list the minimum and have the rest taken care of ...
+
+  {}\item Fortran 2003 support?
+
+  \end{enumerate}
+
+{}\item Testing Issues
+
+  \begin{enumerate}
+
+  {}\item Examples are not being tested (they must be tested as well
+  as being built)
+
+  {}\item There is no way to run a test with more than one set of test
+  arguments (we need to support running test and example executables
+  with multiple sets of command-line arguments and we need different
+  names for each test case that gets reported)
+
+  {}\item Keywords of some type need to be supported (okay, the name
+  of the package is in there but that is not really enough) ... This
+  appears to be a fundamental deficiency of CMake/CTest.
+
+  \end{enumerate}
+
+\end{enumerate}
+
+
+% ---------------------------------------------------------------------- %
+% References
+%
+\clearpage
+\bibliographystyle{plain}
+\bibliography{references}
+\addcontentsline{toc}{section}{References}
+
+
+\begin{SANDdistribution}[NM]
+% \SANDdistCRADA	% If this report is about CRADA work
+% \SANDdistPatent	% If this report has a Patent Caution or Patent Interest
+% \SANDdistLDRD	% If this report is about LDRD work
+% External Address Format: {num copies}{Address}
+%\SANDdistExternal{}{}
+%\bigskip
+%% The following MUST BE between the external and internal distributions!
+%\SANDdistClassified % If this report is classified
+% Internal Address Format: {num copies}{Mail stop}{Name}{Org}
+%\SANDdistInternal{}{}{}{}
+% Mail Channel Address Format: {num copies}{Mail Channel}{Name}{Org}
+%\SANDdistInternalM{}{}{}{}
+%\SANDdistInternal{2}{MS 9018}{Central Technical Files}{8944}
+%\SANDdistInternal{2}{MS 0899}{Technical Library}{4536}
+\end{SANDdistribution}
+
+\end{document}
