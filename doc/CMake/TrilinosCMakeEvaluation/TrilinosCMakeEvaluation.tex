@@ -150,7 +150,7 @@ by the current autotools system:
 
     \end{enumerate}
 
-  {}\item Dependancy tracking of object files to rearcive libraries
+  {}\item Dependancy tracking of object files to libraries
 
     \begin{enumerate}
 
@@ -165,11 +165,14 @@ by the current autotools system:
 
     \begin{enumerate}
 
-    {}\item Autotools: Export makefile system (with makefile
-    fragements Makefile.package.export) defines a single file where
-    these are things are defined.  Every test and example in Trilinos
-    (with a few shamefull exception) uses the export makefiles to get
-    all of these.  There is no duplication.
+    {}\item Why this is important: This is needed to allow for the
+    scalable growth and maintenance of Trilinos.
+
+    {}\item Autotools: The current export makefile system (with
+    makefile fragements Makefile.package.export) defines a single file
+    where these are things are defined.  Every test and example in
+    Trilinos (with a few shameful exceptions) uses the export
+    makefiles to get all of these.  There is no duplication.
 
     {}\item CMake: Chapter 7 in {}\cite{MasteringCMake_fourth}
     describes a system would this should be well supported but it does
@@ -184,7 +187,7 @@ by the current autotools system:
     \begin{enumerate}
 
     {}\item Why this is important: It is not clear where to put some
-    examples/tests what require multiple packages and there are
+    examples/tests which require multiple packages and there are
     several cases of tests/examples that refer to libraries that build
     later in the build tree.
 
@@ -208,7 +211,7 @@ by the current autotools system:
 
     {}\item CMake: One needs to have cmake built on the target
     platform but all that is needed to build and install cmake is a
-    fairly recent C++ compilers.  A simple 'configure', 'make',
+    fairly recent C++ compilers.  A simple 'configure', 'make', and
     'make install' is all that is needed.
 
     \end{enumerate}
@@ -221,8 +224,8 @@ by the current autotools system:
     {}\item Why this is important: ForTrilinos requires a very current
     Fortran 90 compiler with some Fortran 2003 features.
 
-    {}\item Autotools: This is currently handled by setting by setting
-    'F90' to point to the fortran 90+ compiler when calling configure.
+    {}\item Autotools: This is currently handled by setting 'F90' to
+    point to the fortran 90+ compiler when calling configure.
 
     {}\item CMake: It is unclear how CMake support Fortran 90+ but
     Chapter 11 in {}\cite{MasteringCMake_fourth} deals with how to add
@@ -242,10 +245,10 @@ autotools system:
 
     \begin{enumerate}
 
-    {}\item Why this is important: Fast rebuild/retest cycles before
-    checkin and faster feedback from continuous integration tests
-    needs this.  Currently, it takes up to 50 minutes to relink all
-    the tests and examples in Trilinos.
+    {}\item Why this is important: We need this for fast
+    rebuild/retest cycles before checkin and faster feedback from
+    continuous integration tests.  Currently, it takes up to 50
+    minutes to relink all the tests and examples in Trilinos.
 
     {}\item Autotools: No support at all
 
@@ -258,8 +261,8 @@ autotools system:
 
     \begin{enumerate}
 
-    {}\item Why this is important: A big growth area for Trilinos is
-    Windows customers and the Tritan project requires this.
+    {}\item Why this is important: Windows represents a big growth
+    area for Trilinos is and the Tritan project is one example.
 
     {}\item Autotools: No direct support but cygwin can be used with
     Windows Intel compilers to install headers/libraries.  This is not
@@ -286,7 +289,7 @@ the current autotools system:
     {}\item Why this is important: Some customers demand this.  Also,
     shared libraries can allow for much faster rebuild cycles where
     executables do not even need to be relinked after a dependant
-    library is rebuilt.  This can substantially speed up pre-checking
+    library is rebuilt.  This can substantially speed up pre-checkin
     testing and shorten the feedback time from a continuous
     integration server.
 
@@ -295,9 +298,9 @@ the current autotools system:
     not well characterized.
 
     {}\item CMake: Shared library support with CMake is advertised to
-    be very strong (see Section 4.8 in ``Mastering CMake: Fourth
-    Edition'').  Support for shared libraries with CMake in our
-    computing environment is unknown.
+    be very strong (see Section 4.8 in
+    {}\cite{MasteringCMake_fourth}).  Experience with shared libraries
+    with CMake in our computing environment is lacking?
 
     \end{enumerate}
 
@@ -308,8 +311,8 @@ the current autotools system:
 
     {}\item Why this is important: Building compatible client code
     that will successfully link against Trilinos can be difficult to
-    do portabily in a manual way.  This feature is really only used by
-    second-tier customers (e.g. graduate students and other off
+    do portabily when done manually.  This feature is really only used
+    by second-tier customers (e.g. graduate students and other off
     projects) as our major customers handle this differently.
 
     {}\item Autotools: This is done by installing
@@ -360,8 +363,8 @@ handled by the current perl test harness:
 
   \begin{enumerate}
 
-  {}\item Defining different tests with same executable but different
-  sets of test arguments:
+  {}\item Defining different tests with same the executable but
+  different sets of test arguments:
 
     \begin{enumerate}
 
@@ -386,10 +389,10 @@ handled by the current perl test harness:
     {}\item Perl test harness: Full support for keywords and selecting
     tests for individual packages is built in.
 
-    {}\item CMake/CTest: The TRILINOS\_ADD\_EXECUTABLE(...) macro add the
-    package name prefix to all tests (and exmaples) and you can use
-    'ctest -R (PACKAGE1|PACKAGE2|...)' to select any subset of package
-    tests to run.
+    {}\item CMake/CTest: The TRILINOS\_ADD\_EXECUTABLE(...) macro add
+    the package name prefix to all tests (and exmaples) and you can
+    use 'ctest -R (PACKAGE1$|$PACKAGE2$|$...)' to select any subset of
+    package tests to run.
 
     \end{enumerate}
 
@@ -399,14 +402,15 @@ handled by the current perl test harness:
     \begin{enumerate}
 
     {}\item Why this is important: It is important to create targeted
-    reults pages and email so that individual package developers can
-    focus on their own packages and not be distracted by errors from
-    other related packages.  This is something that SIERRA does *not*
-    have worked out and it is killing them.
+    package test result web pages and emails so that individual
+    package developers can focus on their own packages and not be
+    distracted by errors from other related packages.  This is
+    something that SIERRA does *not* have worked out and it is killing
+    them.
 
     {}\item Perl test harness: Handled very cleaning but there are
-    still some improvements to be made (e.g. a) listing of all
-    platforms run, b) email notifications)
+    still some improvements to be made .. e.g. a) listing of all
+    platforms run, b) email notifications
 
     {}\item CMake/CTest/CDash: ???
 
@@ -420,14 +424,16 @@ handled by the current perl test harness:
     in a very clean way.
 
     {}\item CMake: No direct support but could be implemented using
-    CMake macros?
+    system introspection in a CMake macro?  $=>$ Platform includes and
+    excludes would have to be added to a new TRILINOS\_ADD\_TEST(..) 
+    macro?
 
     \end{enumerate}
 
   \end{enumerate}
 
-{}\item Critical testing features not currently handled by the current
-perl test harness:
+{}\item Critical testing features not currently handled by the perl
+test harness:
 
   \begin{enumerate}
 
@@ -436,10 +442,10 @@ perl test harness:
     \begin{enumerate}
 
     {}\item Why this is important: This is one of the most basic
-    metrics of code quality and of the completeness of tests
+    metrics of code quality and of the completeness of tests.
 
     {}\item Perl test harness: Has been supported in the past but not
-    currently working.
+    currently working?
 
     {}\item CMake: Built-in support and run on many platforms by lots
     of other groups.
@@ -454,11 +460,11 @@ perl test harness:
     continue to degrade the quality of our code and they tend to sit
     dormant for long periods of time and don't cause major problems
     until we really need our software to work.  This includes memory
-    leaks, accessing deleted memory, access memory with invalid
+    leaks, accessing deleted memory, accessing memory with invalid
     addresses, out-of-bounds errors, etc.
 
     {}\item Perl test harness: Has been supported in the past but not
-    currently working.
+    currently working?
 
     {}\item CMake: Built-in support and run on many platforms by lots
     of other groups.
@@ -487,7 +493,7 @@ perl test harness:
   \end{enumerate}
 
 {}\item Less-critical but desirable features not currently handled by
-the current perl test harness:
+the perl test harness:
 
   \begin{enumerate}
 
@@ -498,7 +504,7 @@ the current perl test harness:
     {}\item Perl test harness: No direct support but could be handled
     with a special test category and run for optimized builds?
 
-    {}\item CMake: No direct support but could be handled
+    {}\item CMake: No direct support but could be handled in some way?
 
     \end{enumerate}
 
@@ -513,33 +519,34 @@ the current perl test harness:
     {}\item Perl test harness: No support
 
     {}\item CMake: Planned to be added to the next major release of
-    CMake/CTest\footnote{
-
-List:       cmake
-Subject:    Re: [CMake] parallel builds for ctest
-From:       "Alan W. Irwin" <irwin () beluga ! phys ! uvic ! ca>
-Date:       2008-02-16 19:22:39
-Message-ID: Pine.LNX.4.60.0802161105280.4080 () ybpnyubfg ! ybpnyqbznva
-[Download message RAW]
-
-On 2008-02-16 12:38-0500 Bill Hoffman wrote:
-
-> [...]parallel ctest is on the todo list for this year.  Most likely  it 
-> will be ctest -j N.   We can not depend on the make system to do the parallel 
-> stuff, and ctest -j would be useful for all generators.
-
-That's excellent news!  The execution of the PLplot tests actually take
-about the same time to run as (non-parallel) building of PLplot itself. Now
-we are doing our builds in parallel, convenient parallel testing will be
-most welcome as well, and I look forward to trying out that new ctest
-functionality once you are ready.
-
-Alan
-} % End footnote
+    CMake/CTest
+      
+      {\scriptsize\begin{verbatim}
+      List:       cmake
+      Subject:    Re: [CMake] parallel builds for ctest
+      From:       "Alan W. Irwin" <irwin () beluga ! phys ! uvic ! ca>
+      Date:       2008-02-16 19:22:39
+      Message-ID: Pine.LNX.4.60.0802161105280.4080 () ybpnyubfg ! ybpnyqbznva
+      [Download message RAW]
+      
+      On 2008-02-16 12:38-0500 Bill Hoffman wrote:
+      
+      > [...]parallel ctest is on the todo list for this year.  Most likely  it 
+      > will be ctest -j N.   We can not depend on the make system to do the parallel 
+      > stuff, and ctest -j would be useful for all generators.
+      
+      That's excellent news!  The execution of the PLplot tests actually take
+      about the same time to run as (non-parallel) building of PLplot itself. Now
+      we are doing our builds in parallel, convenient parallel testing will be
+      most welcome as well, and I look forward to trying out that new ctest
+      functionality once you are ready.
+      
+      Alan
+      \end{verbatim}}
 
     \end{enumerate}
 
-  {}\item PBS-type batch MPI testing:
+  {}\item PBS-type batch running of MPI tests:
 
     \begin{enumerate}
 
@@ -550,9 +557,10 @@ Alan
     efficient way.
 
     {}\item Perl test harness: No support yet but some experimentation
+    has been done?
 
-    {}\item CMake: Not directly supported by could be implemented in
-    the native CMake scripting language?
+    {}\item CMake: Not directly supported but it could be implemented
+    in the native CMake scripting language?
 
     \end{enumerate}
 
@@ -563,10 +571,11 @@ Alan
     {}\item Why this is important: Complete test results are needed to
     be able to diagnose failing tests.  Otherwise, you must manually
     go to the platform, build the executable(s) and run the tests
-    manually.
+    manually.  Older test result data can be cleaned out as space gets
+    tight.
 
     {}\item Perl test harness: Currently, only stdout is captured and
-    saved and then only a limit of ??? bytes for each file
+    saved and then only a limit of ??? bytes for each file.
 
     {}\item CMake/CTest/CDash: ???
 
@@ -580,7 +589,8 @@ Alan
     {}\item Why this is important: Complex tests require that you be
     able to define ``success'' in a variety of ways.  Examples: a)
     Greping an output file looking for a specific string, b) Checking
-    for a non-zero return value and a specific sting in stdout, c)
+    for a non-zero return value and greping for a specific string in
+    stdout, c) ???
 
     {}\item Perl test harness: The current Trilinos test harness only
     allows you to run one script as the test or a single grep of the
@@ -588,7 +598,7 @@ Alan
     enough.
 
     {}\item CMake/CTest: No direct support but you could define a
-    CMake macro in CTest to do this?
+    CMake macro for CTest to do this?
 
     \end{enumerate}
 
@@ -621,11 +631,12 @@ Alan
 
   {}\item There is a lot of logic in the top-level CMakeList.txt file
   that looks like might be better distributed into the various
-  package's CMakeLists.txt files ...
+  package's CMakeLists.txt files?
 
-  {}\item There is way too much clutter in the CMakeList.txt for tests
-  and examples to handle MPI and other issues ... We need to be able
-  to just list the minimum and have the rest taken care of ...
+  {}\item There is too much clutter and duplication in the
+  CMakeList.txt for for tests and examples to handle MPI and other
+  issues ... We need to be able to just list the minimum and have the
+  rest taken care of ...
 
   {}\item Fortran 2003 support?
 
