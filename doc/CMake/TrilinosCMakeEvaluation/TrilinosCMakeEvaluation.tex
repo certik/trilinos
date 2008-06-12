@@ -4,6 +4,7 @@
 %Local stuff
 \usepackage{graphicx}
 \usepackage{latexsym}
+\usepackage[all]{draftcopy}
 \input{rab_commands}
 \newtheorem{theorem}{Theorem}
 
@@ -227,25 +228,6 @@ different packages
 
   \end{enumerate}
 
-{}\item Must support multiple languages including Fortran 77,
-Fortran 90, and Fortran 2003
-
-  \begin{enumerate}
-
-  {}\item Why this is important: ForTrilinos requires a very current
-  Fortran 90 compiler with some Fortran 2003 features.
-
-  {}\item Autotools: This is currently handled by setting 'F90' to
-  point to the Fortran 90+ compiler when calling configure.
-
-  {}\item CMake: It is unclear how CMake support Fortran 90+ but
-  Chapter 11 in {}\cite{MasteringCMake_fourth} deals with how to add
-  new compilers so it seems this could be supported more cleanly
-  than with autotools. $=>$ Perhaps we can copy and extend the
-  Fortran 90 macro package?
-
-  \end{enumerate}
-
 {}\item Cross compiling
 
   \begin{enumerate}
@@ -300,6 +282,31 @@ existing autotools system}
   Studio.  There is lots of experience with this at Sandia for
   Visual Studio and NMake for native Windows binaries.  This is one
   of the major selling points for CMake over the autotools system.
+
+  \end{enumerate}
+
+{}\item Must support multiple languages including Fortran 77,
+Fortran 90, and Fortran 2003
+
+  \begin{enumerate}
+
+  {}\item Why this is important: ForTrilinos requires a very current
+  Fortran 90 compiler with some Fortran 2003 features.
+
+  {}\item Autotools: This is currently handled by setting 'F90' to
+  point to the Fortran 90+ compiler when calling configure.  However,
+  Fortran 2003 with gfortran creates auxiliary files that need to be
+  linked symbolically linked in a manual way and it is not clear how
+  portable this is.  Basically, autotools really does *not* support
+  Fortran 2003.  What we have right now is a hack that works with
+  gfortran.
+
+  {}\item CMake: It is unclear how CMake support Fortran 90+ but
+  Chapter 11 in {}\cite{MasteringCMake_fourth} deals with how to add
+  new compilers so it seems this could be supported more cleanly than
+  with autotools. $=>$ Perhaps we can copy and extend the Fortran 90
+  macro package?  This may be hard to make portable but hopfully we
+  would get some help from the CMake community or Kitware.
 
   \end{enumerate}
 
@@ -1024,11 +1031,12 @@ packages up to spec with the above requirements and to achieve:
   \end{enumerate}
 
 {}\item Expand CMake/CTest support to the packages rtop, thyra,
-amesos, ifpack, aztecoo, and straimikos.
+amesos, ifpack, aztecoo, stratimikos, CTrilinos, and ForTrilinos.
 
-This list of packages will bring a number of new issues into play and
-will help to test the circular test/example library dependancies
-issue.
+This list of packages will bring a number of new issues into play
+(e.g. different capitalization of package directories, Fortran 2003
+support, etc.)  and will help to test the circular test/example
+library dependancies issue.
 
 \end{enumerate}
 
