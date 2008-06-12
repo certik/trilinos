@@ -128,6 +128,13 @@ Autotools is terrible. We need something better.  How about CMake?
 
 
 %
+\section{Introduction}
+%
+
+Blah, blah, blah ...
+
+
+%
 \section{Build Capabilities and Features}
 %
 
@@ -300,8 +307,7 @@ existing autotools system}
 
 
 %
-{}\subsection{Less-critical but desirable features not currently
-handled by the existing autotools system}
+{}\subsection{Less-critical but desirable build features}
 %
 
 \begin{enumerate}
@@ -372,6 +378,72 @@ functionality
   the ability to define lists and loops over those lists and create
   arbitrary new functions (call macros).  The CMake scripting
   language does seem to be a little too implicit for my liking.
+
+  \end{enumerate}
+
+{}\item Simple development environment
+
+  \begin{enumerate}
+
+  {}\item Why this is important: Leaning how to develop in a Trilinos
+  package needs to be faily easy and setting up a development
+  environment needs to be faily easy to work with.
+
+  {}\item Autotools: In order to develop on Trilinos, you need to go
+  out and find specific versions of autoconf and automake and put them
+  on whatever system where you will need to change the build system
+  for any reason (e.g. add/remove files, add new tests, etc.).  This
+  is a big hassle when you work on a variety of platforms, espeically
+  ones where you do not have root administrator privileges (e.g. the
+  SCICO LAN).  Also, whenever you changed any Makefile.am file or
+  configure.ac file, you need to remember to run ./bootscrap in any
+  package that you change and at the top level.  It is easy to forget
+  or hassle to run these scripts.
+
+  {}\item CMake: With CMake there is no intermediate ``bootstrap''
+  step.  After the CMake files are modified, they can be directly
+  checked in (after being tested of course).  As a developer, this
+  means only having to get the CMake source and install it (version
+  2.6 is currently required but 2.7 is needed for correct CDash
+  reporting).  That is better than having to get two different
+  programs with different versions for automake and autoconf.
+
+  \end{enumerate}
+
+{}\item Simple installation for users
+
+  \begin{enumerate}
+
+  {}\item Why this is important: While installing Trilinos for users
+  for the general case will never be ``easy'' because of the
+  complexity of Trilinos, we don't want to make it too hard.
+
+  {}\item Autotools: With autotools, a ``configure'' shell script is
+  provided and in theory, a user just needs to run configure with the
+  correct input arguments and then they can do 'make install'.
+  Testing a serial version of Trilinos is also easy as 'make
+  runtests-serial'.  Running the full serial test suite requires 'make
+  rutnests-serial TRILINOS\_TEST\_CATEGORY=FRAMEWORK'.  However,
+  running the MPI tests is not so easy and I imagine most users will
+  never do this because of having to specify several other tricky make
+  variables like TRILINOS\_MPI\_GO.  Also, in order to really install
+  and test all of Trilinos on some systems, you have to use
+  --with-gnumake or you get ``command-line too long'' errors or errors
+  that are much more cryptic.  What this means is that you essentally
+  need to have and use GNU Make in order to make Trilinos portable.
+  On some systems, user may have to install GNU Make theirselves but
+  usually it is already installed and they just need to use it instead
+  of the default 'make' command.
+
+  {}\item CMake: Users must have a current enough version (currently
+  2.6) of cmake installed on their system to configure and generate
+  makefiles and then build and install.  However, for some specialized
+  distributions, it will be possible to distribute RPM files, MS
+  Visual Studio project files, and the like where users would not need
+  CMake but there will be less flexibility in what packages and
+  options are enabled and disabled.  Note, however, that cmake appears
+  to be as portable and easy to build from source as GNU Make so this
+  is not a huge extra requirement over the autotools system.
 
   \end{enumerate}
 
@@ -539,8 +611,7 @@ test harness}
 
 \
 %
-{}\subsection{Less-critical but desirable features not currently handled by
-the perl test harness}
+{}\subsection{Less-critical but desirable testing and reporting features}
 %
 
 \begin{enumerate}
@@ -702,8 +773,14 @@ programs and/or criteria to determine test success or failure
   \begin{enumerate}
 
   {}\item 'Debug' configuration is not supported by current CMake
-  system in Trilinos $=>$ This is supported by the current
-  Trilinos/CMake infrastructure!
+  system in Trilinos
+
+    \begin{itemize}
+
+    {}\item TODO: We can put in logic to check CMAKE\_BUILD\_TYPE and
+    add more define macros (e.g. TEUCHOS\_DEBUG).
+
+    \end{itemize}
 
   {}\item Circular dependencies between tests/examples and other
   packages is not supported ... Default top-level 'make' must build
@@ -712,6 +789,9 @@ programs and/or criteria to determine test success or failure
   {}\item Build system is not scalable or use the
   ``one-definition-rule'' ... There is lots of redundancy in library
   names, include paths, etc. ...
+
+  {}\item CMake system does not put in logic for required enables
+  (e.g. enabling anasazi does not enable epetra or teuchos).
 
   {}\item There is a lot of logic in the top-level CMakeLists.txt file
   that looks like might be better distributed into the various
@@ -749,8 +829,225 @@ programs and/or criteria to determine test success or failure
 
 
 %
+\section{Trilinos/CMake ToDo}
+%
+
+In this section, we describe the specific tasks/requirements that must
+be completed in order to complete this inital Trilinos/CMake
+evaluation to facilitate an informed decision about whether Trilinos
+will drop autotools for the build and swtich over to CMake after
+Trilinos 9.0 is released.  Also, as an another decision, if in
+addition the perl-based test harness will be replaced with CTest/CDash
+and when.  We can drop autotools for building Trilinos and we can keep
+the current perl-based test harness for awhile (or forever) or we can
+switch over to CTest/CDash and drop the current perl-based test
+harness at the same time or we can maintian both test harness for some
+time.  There are many possibilities.
+
+\begin{enumerate}
+
+{}\item Decide on package autonomy
+
+Two options:
+
+  \begin{itemize}
+
+  {}\item Option 1: Require that all packages be built from the top
+  Trilinos level $=>$ This will significanlty reduce the amount of
+  effort it takes to create and maintain packages.  NOTE: Packages
+  that want to build indepenently can add whatever special support for
+  bulding separately.  NOTE: You could pass include directories and
+  libraries to cmake for individual packages.
+
+  {}\item Option 2: Require that all packages be able to build
+  separately not from the top level. $=>$ This forces every package
+  have to take on this requirement.
+
+  \end{itemize}
+
+Group's suggested approach: Have each package just read and write
+global varaibles for PACKAGE\_INCLUDE\_DIRS and PACKAG\_LIBS set up at
+the global level.  Then, packages can be configured and built
+independently by passing in the needed cache variables.  TODO: Set up
+example to prove that this works with a) Dakota, b) Acro, c) simple
+example in Trilinos to test this?
+
+{}\item Deal with issue of different cases for package names and their
+directory names.  We might just define a double entry list like:
+
+\begin{verbatim}
+
+# Package name and its package directory name
+SET( PACKAGES
+  Teuchos teuchos
+  Epetra epetra
+  ...
+  ForTrilinos ForTrilinos
+  MOOCHO moocho
+  )
+LIST(LENGTH PACKAGES PACKAGES_LEN)
+MATH(EXPR NUM_PACKAGES "${PACKAGES_LEN}/2")
+
+
+...
+
+MATH(EXPR PACKAGES_MAX_IDX "${NUM_PACKAGES} - 1")
+FOREACH(PACKAGE_IDX RANGE 0 ${PACKAGES_MAX_IDX})
+  MATH(EXPR PACKAGE_NAME_IDX "2*${PACKAGE_IDX}")
+  MATH(EXPR PACKAGE_DIR_IDX "2*${PACKAGE_IDX}+1")
+  LIST(GET PACKAGES ${PACKAGE_NAME_IDX} PACKAGE_NAME)
+  LIST(GET PACKAGES ${PACKAGE_DIR_IDX} PACKAGE_DIR)
+ ...
+ENDFOREACH()
+
+\end{verbatim}
+
+{}\item Deal circular dependancies between tests/examples and
+up-stream libraries.  This will require both a two-step configuration
+process and a two-step build process.
+
+{}\item Refactor and break about the TRILINOS\_ADD\_EXECUTABLE(...) 
+script to separate add\_target(...) and add\_test(...) commands.
+Features that these new scripts must support are:
+
+  \begin{enumerate}
+  \item Allow test target executable to be defined independently (see example below)
+  \item All executables should have the *.exe extension, even on Linux
+    as this makes it easy to grep for executables and this is the
+    current Trilinos convention. 
+  \item Not assume tests are in a subdirectory but allow for this
+  \item Run and test ``examples'' as well as ``tests''
+  \item Allow for multiple sets of arguments for each test executable
+  \item Allow each final test name to be given a unique postfix name
+  \item If unique test name is not given, allow for automatic numeric postfix
+  \item Build in MPI information (serial and/or MPI, number of processors, etc.)
+  \item Specify current working directory where the test should be run from
+    (e.g. DESEND\_INTO\_DIRECTORY option)
+  \item Include or exlucde specific machines for running a test (both
+    as a group of tests or individually)
+  \item Support adding keywords for groups of tests or individual tests
+    (requires keyword support in ctest which it does not have)
+  \item Allow passthrough of all of the set\_test\_properties(...) command
+    for WILL\_FAIL, PASS\_REGULAR\_EXPRESSION, and FAIL\_REGULAR\_EXPRESSION.
+  \end{enumerate}
+
+Here is what an example of the refactored macros might look like:
+
+\begin{verbatim}
+
+# Just define the exec target ./MemoryManagement/ArrayRCP_test.exe
+TRILINOS_ADD_EXECUTABLE(ArrayRCP_test
+  DIRECTORY MemoryManagement
+  SOURCES ArrayRCP_test.cpp
+  )
+
+# Define the tests that will run ./MemoryManagement/ArrayRCP_test.exe
+TRILINOS_ADD_TEST(ArrayRCP_test
+  DIRECTORY MemoryManagement
+  DESEND_INTO_DIR
+  XHOST S859352.sandia.gov # Run on all hosts except this one
+  KEYWORDS unit framework install
+  PASS\_REGULAR\_EXPRESSION "All Tests PASSED"
+  COMM SERIAL
+  COMM MPI "1"
+  ARGS --n=1 POSTFIX "one"
+  ARGS --n=2 --verbose POSTFIX "two-verbose"
+  ARGS --n=4 POSTFIX "four"
+  )
+
+TRILINOS_ADD_TEST(ArrayRCP_test
+  DIRECTORY MemoryManagement
+  DESEND_INTO_DIR
+  KEYWORDS performance
+  COMM MPI "1-16"
+  ARGS --n=500 POSTFIX "big500" HOST gabriel.sandia.gov
+  ARGS --n=1000 POSTFIX "big1000" HOST regression.sandia.gov
+  )
+
+\end{verbatim}
+
+It is critically important that the TRILINOS\_ADD\_TEST(...) macro be
+very flexible and full featured as it needs to replace the current
+perl-based test harness PACKAGE/test/defintion file entries.
+
+{}\item Organize CMake-built tests in the same way as the autotools
+system to allow exisitng PACKAGE/test/definition files to be easily
+updated to call the CMake-built versions.  This will allow us to drop
+the autotools build system but still maintain the current perl-based
+test harness until such time that the CTest/CDash version can be
+developed as a good replacment.  We can facilitate this by duplicating
+entries in the existing PACKAGE/test/defintion files like:
+
+\begin{verbatim}
+
+# List tests for both autotools-built and CMake built versions
+(FRAMEWORK,INSTALL) {
+    TESTS = MemoryManagement/ArrayRCP_test.exe, # Current autotools
+            MemoryManagement/Teuchos-Test-ArrayRCP_test.exe; # New CMake
+    ARGS = --teuchos-suppress-startup-banner;
+    EXIT-STATUS = STRING-COMPARISON;
+    COMM = MPI(1),SERIAL;
+}
+
+\end{verbatim}
+
+Above, the perl-based test harness will run whichever executable
+exists (which will alway be either ArrayRCP\_test.exe or
+Teuchos-Test-ArrayRCP\_test.exe, never both).
+
+The above approach will make adding CMake-built executables easy and
+it will be easy to maintain.  Also, the autotools versions can be
+removed (mostly be hand) after the autotools build has been removed
+and fully replaced by CMake for the build.
+
+{}\item Bring the current Trilinos/CMake support in the existing
+packages up to spec with the above requirements and to achieve:
+
+  \begin{enumerate}
+  \item Remove all duplication in header file paths, library paths and libraries.
+  \item Make the default 'make' target just build libraries and add
+    'tests' and 'examples' targets just like the current autotools system
+    does
+  \item Implement two-state configuration and building to support circular
+    dependancies between tests/examples and up-stream libraries.  Test this
+    in a superficial way?
+  \item Build all test and example executables with similar names in the
+    same locations as is being done with existing autotools system
+  \item Upgrade the current PACKAGE/test/definition files to call all
+    of the same tests as is being called with autotools-built system.
+    Verify this in a number of ways?
+  \item Add fully ctest testing support for all current tests and examples
+    the same as is defined and being performed with the current
+    PACKAGES/test/definition files
+  \item Get a CDash dashboard up and running controled by Trilinos developers
+    and get nightly testing with a cron scirpt going.
+  \end{enumerate}
+
+{}\item Expand CMake/CTest support to the packages rtop, thyra,
+amesos, ifpack, aztecoo, and straimikos.
+
+This list of packages will bring a number of new issues into play and
+will help to test the circular test/example library dependancies
+issue.
+
+\end{enumerate}
+
+Once all of the above tasks are finished, this initial evaluation of
+CMake/CTest/CDash etc. for Trilinos will be complete.
+
+Shortly after the completion of the evaluation and the corresponding
+summary and conclusions are stated below, the Trilinos leaders will
+decide on a course of action regarding replacing the current autotools
+and perl-based test harness with CMake/CTest/CDash/CPack and on a time
+table for doing so.
+
+%
 \section{Desired and required enhancements to CMake/CTest/CDash}
 %
+
+Here we list some identified areas of missing support in
+CMake/CTest/CDash that we either strongly need or would be of great
+benefit for Trilinos.
 
 \begin{enumerate}
 
@@ -772,6 +1069,12 @@ for SIERRA + Trilinos Integration test repository.
 
 \end{enumerate}
 
+
+%
+\section{Summary and Recommendations}
+%
+
+Blah, blah, blah ...
 
 
 % ---------------------------------------------------------------------- %
