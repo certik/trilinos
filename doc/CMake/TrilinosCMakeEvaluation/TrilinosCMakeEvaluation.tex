@@ -291,7 +291,8 @@ Fortran 90, and Fortran 2003
   \begin{enumerate}
 
   {}\item Why this is important: ForTrilinos requires a very current
-  Fortran 90 compiler with some Fortran 2003 features.
+  Fortran 90 compiler with some Fortran 2003 features.  Included in
+  this is name mangling for Fortran 77.
 
   {}\item Autotools: This is currently handled by setting 'F90' to
   point to the Fortran 90+ compiler when calling configure.  However,
@@ -299,14 +300,18 @@ Fortran 90, and Fortran 2003
   linked symbolically linked in a manual way and it is not clear how
   portable this is.  Basically, autotools really does *not* support
   Fortran 2003.  What we have right now is a hack that works with
-  gfortran.
+  gfortran.  Name mangling with Fortran 77 is well supported and
+  largely automatic on most platforms.
 
   {}\item CMake: It is unclear how CMake support Fortran 90+ but
   Chapter 11 in {}\cite{MasteringCMake_fourth} deals with how to add
   new compilers so it seems this could be supported more cleanly than
   with autotools. $=>$ Perhaps we can copy and extend the Fortran 90
   macro package?  This may be hard to make portable but hopfully we
-  would get some help from the CMake community or Kitware.
+  would get some help from the CMake community or Kitware.  Right now
+  Fortran 77 name mangling is determined by platform but it will be
+  easy to write a Module/Macro that will figure this out automtically
+  if such capability does not already exist.
 
   \end{enumerate}
 
@@ -922,6 +927,9 @@ Features that these new scripts must support are:
   \item All executables should have the *.exe extension, even on Linux
     as this makes it easy to grep for executables and this is the
     current Trilinos convention. 
+  \item Allow the names of the test executables to be exactly the same
+    as with current autotools system (to allow use of test/definition
+    files with no changes)
   \item Not assume tests are in a subdirectory but allow for this
   \item Run and test ``examples'' as well as ``tests''
   \item Allow for multiple sets of arguments for each test executable
@@ -949,24 +957,29 @@ TRILINOS_ADD_EXECUTABLE(ArrayRCP_test
   )
 
 # Define the tests that will run ./MemoryManagement/ArrayRCP_test.exe
-TRILINOS_ADD_TEST(ArrayRCP_test
+TRILINOS_ADD_TEST(ArrayRCP_test # The name of the executable (required)
+  NAME ArrayRCP_test # Name of the test (defalts to executable name)
   DIRECTORY MemoryManagement
   DESEND_INTO_DIR
   XHOST S859352.sandia.gov # Run on all hosts except this one
   KEYWORDS unit framework install
-  PASS\_REGULAR\_EXPRESSION "All Tests PASSED"
-  COMM SERIAL
-  COMM MPI "1"
+  PASS_REGULAR_EXPRESSION "All Tests PASSED"
+  COMM serial mpi
+  NUM_MPI_PROCS 1
   ARGS --n=1 POSTFIX "one"
   ARGS --n=2 --verbose POSTFIX "two-verbose"
   ARGS --n=4 POSTFIX "four"
   )
 
+# Above, add_test(...) would define the tests ArrayRCP_test-one,
+# ArrayRCP_test-two-verbose, and ArrayRCP_test-four.
+
 TRILINOS_ADD_TEST(ArrayRCP_test
   DIRECTORY MemoryManagement
   DESEND_INTO_DIR
   KEYWORDS performance
-  COMM MPI "1-16"
+  COMM serial mpi
+  NUM_MPI_PROCS 1-16
   ARGS --n=500 POSTFIX "big500" HOST gabriel.sandia.gov
   ARGS --n=1000 POSTFIX "big1000" HOST regression.sandia.gov
   )
@@ -978,34 +991,11 @@ very flexible and full featured as it needs to replace the current
 perl-based test harness PACKAGE/test/defintion file entries.
 
 {}\item Organize CMake-built tests in the same way as the autotools
-system to allow exisitng PACKAGE/test/definition files to be easily
-updated to call the CMake-built versions.  This will allow us to drop
-the autotools build system but still maintain the current perl-based
-test harness until such time that the CTest/CDash version can be
-developed as a good replacment.  We can facilitate this by duplicating
-entries in the existing PACKAGE/test/defintion files like:
-
-\begin{verbatim}
-
-# List tests for both autotools-built and CMake built versions
-(FRAMEWORK,INSTALL) {
-    TESTS = MemoryManagement/ArrayRCP_test.exe, # Current autotools
-            MemoryManagement/Teuchos-Test-ArrayRCP_test.exe; # New CMake
-    ARGS = --teuchos-suppress-startup-banner;
-    EXIT-STATUS = STRING-COMPARISON;
-    COMM = MPI(1),SERIAL;
-}
-
-\end{verbatim}
-
-Above, the perl-based test harness will run whichever executable
-exists (which will alway be either ArrayRCP\_test.exe or
-Teuchos-Test-ArrayRCP\_test.exe, never both).
-
-The above approach will make adding CMake-built executables easy and
-it will be easy to maintain.  Also, the autotools versions can be
-removed (mostly be hand) after the autotools build has been removed
-and fully replaced by CMake for the build.
+system to allow exisitng PACKAGE/test/definition files to be used
+without modification.  This will allow us to drop the autotools build
+system but still maintain the current perl-based test harness until
+such time that the CTest/CDash version can be developed as a good
+replacment.
 
 {}\item Bring the current Trilinos/CMake support in the existing
 packages up to spec with the above requirements and to achieve:
@@ -1015,14 +1005,11 @@ packages up to spec with the above requirements and to achieve:
   \item Make the default 'make' target just build libraries and add
     'tests' and 'examples' targets just like the current autotools system
     does
-  \item Implement two-state configuration and building to support circular
+  \item (Optional and not critical) Implement two-state configuration and building to support circular
     dependancies between tests/examples and up-stream libraries.  Test this
     in a superficial way?
-  \item Build all test and example executables with similar names in the
+  \item Build all test and example executables with exact same names in the
     same locations as is being done with existing autotools system
-  \item Upgrade the current PACKAGE/test/definition files to call all
-    of the same tests as is being called with autotools-built system.
-    Verify this in a number of ways?
   \item Add fully ctest testing support for all current tests and examples
     the same as is defined and being performed with the current
     PACKAGES/test/definition files
@@ -1031,7 +1018,8 @@ packages up to spec with the above requirements and to achieve:
   \end{enumerate}
 
 {}\item Expand CMake/CTest support to the packages rtop, thyra,
-amesos, ifpack, aztecoo, stratimikos, CTrilinos, and ForTrilinos.
+amesos, ifpack, aztecoo, stratimikos, CTrilinos, and ForTrilinos
+(optionally).
 
 This list of packages will bring a number of new issues into play
 (e.g. different capitalization of package directories, Fortran 2003
