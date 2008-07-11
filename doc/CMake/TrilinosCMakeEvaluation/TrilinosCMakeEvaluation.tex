@@ -920,30 +920,81 @@ process and a two-step build process.
 
 {}\item Refactor and break about the TRILINOS\_ADD\_EXECUTABLE(...) 
 script to separate add\_target(...) and add\_test(...) commands.
-Features that these new scripts must support are:
+Features that these new scripts must support and related issues
+include:
 
   \begin{enumerate}
-  \item Allow test target executable to be defined independently (see example below)
-  \item All executables should have the *.exe extension, even on Linux
-    as this makes it easy to grep for executables and this is the
-    current Trilinos convention. 
-  \item Allow the names of the test executables to be exactly the same
-    as with current autotools system (to allow use of test/definition
-    files with no changes)
-  \item Not assume tests are in a subdirectory but allow for this
-  \item Run and test ``examples'' as well as ``tests''
-  \item Allow for multiple sets of arguments for each test executable
-  \item Allow each final test name to be given a unique postfix name
-  \item If unique test name is not given, allow for automatic numeric postfix
-  \item Build in MPI information (serial and/or MPI, number of processors, etc.)
-  \item Specify current working directory where the test should be run from
-    (e.g. DESEND\_INTO\_DIRECTORY option)
-  \item Include or exlucde specific machines for running a test (both
-    as a group of tests or individually)
-  \item Support adding keywords for groups of tests or individual tests
-    (requires keyword support in ctest which it does not have)
-  \item Allow passthrough of all of the set\_test\_properties(...) command
-    for WILL\_FAIL, PASS\_REGULAR\_EXPRESSION, and FAIL\_REGULAR\_EXPRESSION.
+
+  {}\item Allow test target executable to be defined independently
+  from its test [Done]
+
+  {}\item All executables should have the *.exe extension, even on
+  Linux as this makes it easy to grep for executables and this is the
+  current Trilinos convention ... Investigate what happens on Windows
+  ... see if there is an global extention to add ... [Somewhat done
+  but more testing]
+
+  {}\item Allow (require) the names of the test executables to be
+  exactly the same as with current autotools system (to allow use of
+  test/definition files with no changes) ... This needs to be
+  supported with the DIRECTORY option also [Done]
+
+  {}\item Include or exlucde specific machines for running a test
+  (both as a group of tests or individually) ... I.e. HOST and XHOST
+  [Done]
+
+  {}\item Do not assume tests are in a subdirectory but allow for this
+  (i.e. the DIRECTORY argument is optional) ... This needs to be
+  tested.
+
+  {}\item Allow for multiple sets of input arguments for each test
+  executable
+
+    \begin{itemize}
+
+    {}\item If unique test name is not given, allow for automatic
+    numeric postfix
+
+    \end{itemize}
+
+  {}\item Build in MPI information (serial and/or MPI, number of
+  processors, etc.)
+
+    \begin{itemize}
+
+    {}\item The ``Comm'' (i.e. 'mpi' or 'serial') [Done
+
+    {}\item Selection/defintion of test based on the number of allowed
+    MPI processors for the test and the global machine max number of
+    processes (Hint: See what the perl-based 'runtests' script does).
+    I.e. compare the input NUM\_MPI\_PROCS to the global cache varible
+    MPIEXEC\_MAX\_NUMPROCS and see if the test passes.  TODO: Search
+    through the test/definition files to see how COMM = MPI(???) is
+    actually being used and talk with Jim W.\ about this.
+	
+    \end{itemize}
+
+  {}\item Allow passthrough of all of the set\_test\_properties(...) 
+  command for WILL\_FAIL, PASS\_REGULAR\_EXPRESSION (Done), and
+  FAIL\_REGULAR\_EXPRESSION (Done).
+
+  {}\item (Low priority) Put in support for the compareTestOutput
+  program and other post-processing programs that look at test output.
+  TODO: Grep through the current test/definition files to see where
+  compareTestOutput.  Also, talk with Jim W. about making this feature
+  more flexible and simpler to use any postprocessing program to
+  determine success or failure.
+
+  {}\item (Low priority) Support adding keywords for groups of tests
+  or individual tests.  Supporting this for real requires keyword
+  support in ctest which it does not have this but we could emulate
+  this by expacting the name of the test with the keywords.
+
+  {}\item (Low priority) Specify current working directory where the
+  test should be run from (e.g. DESEND\_INTO\_DIRECTORY option).
+  TODO: Search and see where DESEND\_INTO\_DIR is being used in
+  current test/defintion files.
+
   \end{enumerate}
 
 Here is what an example of the refactored macros might look like:
@@ -966,60 +1017,68 @@ TRILINOS_ADD_TEST(ArrayRCP_test # The name of the executable (required)
   PASS_REGULAR_EXPRESSION "All Tests PASSED"
   COMM serial mpi
   NUM_MPI_PROCS 1
-  ARGS --n=1 POSTFIX "one"
-  ARGS --n=2 --verbose POSTFIX "two-verbose"
-  ARGS --n=4 POSTFIX "four"
+  ARGS "--verbose --n=1" "--n=2" "--n=4"
   )
 
-# Above, add_test(...) would define the tests ArrayRCP_test-one,
-# ArrayRCP_test-two-verbose, and ArrayRCP_test-four.
+# Above, add_test(...) would define the tests ArrayRCP_test_00,
+# ArrayRCP_test_01, and ArrayRCP_test_02.
 
 TRILINOS_ADD_TEST(ArrayRCP_test
+  NAME ArrayRCP_test_big
   DIRECTORY MemoryManagement
   DESEND_INTO_DIR
   KEYWORDS performance
   COMM serial mpi
-  NUM_MPI_PROCS 1-16
-  ARGS --n=500 POSTFIX "big500" HOST gabriel.sandia.gov
-  ARGS --n=1000 POSTFIX "big1000" HOST regression.sandia.gov
+  NUM_MPI_PROCS 6-16
+  ARGS "--n=500" "--n=1000"
   )
+
+# Above, add_test(...) would define the tests ArrayRCP_test_big_00,
+# ArrayRCP_test_big_01
 
 \end{verbatim}
 
 It is critically important that the TRILINOS\_ADD\_TEST(...) macro be
 very flexible and full featured as it needs to replace the current
-perl-based test harness PACKAGE/test/defintion file entries.
-
-{}\item Organize CMake-built tests in the same way as the autotools
-system to allow exisitng PACKAGE/test/definition files to be used
-without modification.  This will allow us to drop the autotools build
-system but still maintain the current perl-based test harness until
-such time that the CTest/CDash version can be developed as a good
-replacment.
+perl-based test harness PACKAGE/test/defintion file entries.  Also, it
+will be difficult to change once a lot of tests have been defined.
 
 {}\item Bring the current Trilinos/CMake support in the existing
 packages up to spec with the above requirements and to achieve:
 
   \begin{enumerate}
-  \item Remove all duplication in header file paths, library paths and libraries.
-  \item Make the default 'make' target just build libraries and add
-    'tests' and 'examples' targets just like the current autotools system
-    does
-  \item (Optional and not critical) Implement two-state configuration and building to support circular
-    dependancies between tests/examples and up-stream libraries.  Test this
-    in a superficial way?
-  \item Build all test and example executables with exact same names in the
-    same locations as is being done with existing autotools system
-  \item Add fully ctest testing support for all current tests and examples
-    the same as is defined and being performed with the current
-    PACKAGES/test/definition files
-  \item Get a CDash dashboard up and running controled by Trilinos developers
-    and get nightly testing with a cron scirpt going.
+
+  {}\item Remove all duplication in header file paths, library paths
+  and libraries.
+
+  {}\item Make the default 'make' target just build libraries and add
+  'tests' and 'examples' targets just like the current autotools
+  system does
+
+  {}\item Build all test and example executables with exact same names
+  in the same locations as is being done with existing autotools
+  system
+
+  {}\item Put in custom targets 'runtest-serial' and 'runtest-mpi' to
+  invoke the perl 'runtest' script to run tests.  These targets must
+  be supported in each pacakge and at the global Trilinos level.
+
+  {}\item Add fully ctest testing support for all current tests and
+  examples the same as is defined and being performed with the current
+  PACKAGES/test/definition files
+
+  {}\item Get a CDash dashboard up and running controled by Trilinos
+  developers and get nightly testing with a cron scirpt going.
+
+  {}\item (Low priority) Implement two-state configuration and
+  building to support circular dependancies between tests/examples and
+  up-stream libraries.  Test this in a superficial way?
+
   \end{enumerate}
 
-{}\item Expand CMake/CTest support to the packages rtop, thyra,
-amesos, ifpack, aztecoo, stratimikos, CTrilinos, and ForTrilinos
-(optionally).
+{}\item Expand CMake/CTest support to the packages rtop, epetraext,
+thyra, amesos, ifpack, aztecoo, stratimikos, CTrilinos, and
+ForTrilinos (optionally).
 
 This list of packages will bring a number of new issues into play
 (e.g. different capitalization of package directories, Fortran 2003
