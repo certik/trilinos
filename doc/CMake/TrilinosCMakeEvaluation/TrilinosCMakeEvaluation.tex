@@ -929,7 +929,7 @@ include:
   Linux as this makes it easy to grep for executables and this is the
   current Trilinos convention ... Investigate what happens on Windows
   ... see if there is an global extention to add ... [Somewhat done
-  but more testing]
+  but more testing on Windows is needed]
 
   {}\item Allow (require) the names of the test executables to be
   exactly the same as with current autotools system (to allow use of
@@ -942,7 +942,7 @@ include:
 
   {}\item Do not assume tests are in a subdirectory but allow for this
   (i.e. the DIRECTORY argument is optional) ... This needs to be
-  tested.
+  tested. [Done]
 
   {}\item Allow for multiple sets of input arguments for each test
   executable
@@ -953,6 +953,8 @@ include:
     numeric postfix
 
     \end{itemize}
+
+   [Done]
 
   {}\item Build in MPI information (serial and/or MPI, number of
   processors, etc.)
@@ -971,9 +973,11 @@ include:
 	
     \end{itemize}
 
+   [Done]
+
   {}\item Allow passthrough of all of the set\_test\_properties(...) 
   command for WILL\_FAIL, PASS\_REGULAR\_EXPRESSION (Done), and
-  FAIL\_REGULAR\_EXPRESSION (Done).
+  FAIL\_REGULAR\_EXPRESSION [Mostly done].
 
   {}\item (Low priority) Put in support for the compareTestOutput
   program and other post-processing programs that look at test output.
@@ -985,12 +989,16 @@ include:
   {}\item (Low priority) Support adding keywords for groups of tests
   or individual tests.  Supporting this for real requires keyword
   support in ctest which it does not have this but we could emulate
-  this by expacting the name of the test with the keywords.
+  this by tacking on the keywords to the end of each test name in the
+  group.
 
   {}\item (Low priority) Specify current working directory where the
   test should be run from (e.g. DESEND\_INTO\_DIRECTORY option).
   TODO: Search and see where DESEND\_INTO\_DIR is being used in
-  current test/defintion files.
+  current test/defintion files.  Workaround: If you define the test in
+  a CMakeList.txt file in the actualy directory, ctest will cd into
+  that directory when it runs the test.  We don't need
+  DESEND\_INTO\_DIRECTORY [WONTFIX]
 
   \end{enumerate}
 
@@ -1053,6 +1061,11 @@ achieve:
   'tests' and 'examples' targets just like the current autotools
   system does
 
+  {}\item Implement and demonstrate the generation of export makefiles
+  in the same exact way the current autotools system
+  does\footnote{Specifically requested by Mike Heroux and Roger
+  Pawloski}
+
   {}\item Build all test and example executables with exact same names
   in the same locations as is being done with existing autotools
   system
@@ -1083,7 +1096,7 @@ This list of packages will bring a number of new issues into play
 support, etc.)  and will help to test the circular test/example
 library dependancies issue.
 
-{}\item Test out CMake features:
+{}\item Test out and demonstrate CMake features:
 
   \begin{enumerate}
 
@@ -1094,9 +1107,12 @@ library dependancies issue.
   {}\item CTest time-out feature killing MPI tests (see if OpenMPI
   brings down orphaned processes or not)
 
-  {}\item Fully dependancy tracking on various platforms
+  {}\item Full dependancy tracking on various platforms
 
-  {}\item ???
+  {}\item Using CPack to create binary serial distribution for MS
+  Windows (e.g.\ installed headers and libraries, and/or Visual Studio
+  project files, etc.)\footnote{Specifically requested by Mike
+  Heroux.}
 
   \end{enumerate}
 
