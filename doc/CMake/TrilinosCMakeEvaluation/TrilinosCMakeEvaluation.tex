@@ -1052,8 +1052,23 @@ achieve:
 
   \begin{enumerate}
 
+  {}\item Put in custom targets 'runtest-serial' and 'runtest-mpi' to
+  invoke the perl 'runtest' script to run tests.  These targets must
+  be supported in each pacakge and at the global Trilinos level. [Done]
+
   {}\item Remove all duplication in header file paths, library paths
-  and libraries.
+  and libraries
+
+  {}\item Build all test and example executables with exact same names
+  in the same locations as is being done with existing autotools
+  system
+
+  {}\item Add full ctest testing support for all current tests and
+  examples the same as is defined and being performed with the current
+  PACKAGES/test/definition files
+
+  {}\item Get a CDash dashboard up and running controled by Trilinos
+  developers and get nightly testing with a cron scirpt going.
 
   {}\item Make the default 'make' target just build libraries and add
   'tests' and 'examples' targets just like the current autotools
@@ -1063,21 +1078,6 @@ achieve:
   in the same exact way the current autotools system
   does\footnote{Specifically requested by Mike Heroux and Roger
   Pawloski}
-
-  {}\item Build all test and example executables with exact same names
-  in the same locations as is being done with existing autotools
-  system
-
-  {}\item Put in custom targets 'runtest-serial' and 'runtest-mpi' to
-  invoke the perl 'runtest' script to run tests.  These targets must
-  be supported in each pacakge and at the global Trilinos level.
-
-  {}\item Add full ctest testing support for all current tests and
-  examples the same as is defined and being performed with the current
-  PACKAGES/test/definition files
-
-  {}\item Get a CDash dashboard up and running controled by Trilinos
-  developers and get nightly testing with a cron scirpt going.
 
   {}\item (Low priority) Implement two-state configuration and
   building to support circular dependancies between tests/examples and
@@ -1134,6 +1134,10 @@ CMake/CTest/CDash that we either strongly need or would be of great
 benefit for Trilinos.
 
 \begin{enumerate}
+
+{}\item\textit{Strongly desired}: CMake: Generate error messages that
+have line numbers in the corresponding CMakeLists.txt file.
+Currently, it just lists the file name.
 
 {}\item\textit{Strongly desired}: CMake/CTest: Support for keywords
 for tests.  This could be added with a {}\texttt{KEYWORDS} field for
