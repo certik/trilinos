@@ -587,8 +587,19 @@ test harness}
   {}\item Perl test harness: Has been supported in the past but not
   currently working?
 
-  {}\item CMake/CTest: Built-in support and run on many platforms by
-  lots of other groups.
+  {}\item CMake/CTest: Built-in support and is run on many platforms
+  by lots of other groups.  This can be run with:
+
+    \begin{verbatim}
+      ctest -T memcheck
+    \end{verbatim}
+
+  It can also run memory checking as part of the nightly testing
+  process with:
+
+    \begin{verbatim}
+      ctest -D NightlyMemoryCheck
+    \end{verbatim}
 
   \end{enumerate}
 
@@ -604,19 +615,12 @@ test harness}
 
   {}\item Perl test harness: Not currently supported
 
-  {}\item CMake/CTest: Currently supported with a '--test-timeout'
-  option to 'ctest'.  Not clear if this will work with MPI tests
-  (unless we can ensure that the MPI implementation will clean up
-  processes when it mpirun or mpiexec gets killed).  Time out value
-  can also be set as a property on individual tests. $=>$ This is a
-  huge robustness issue.
-
-    \begin{itemize}
-   
-    {}\item TODO: Test timeouts for MPI tests with current
-    Trilinos/CMake infrastructure.
-
-    \end{itemize}
+  {}\item CMake/CTest: Currently supported with the CMake cache
+  variable {}\texttt{DART\_TESTING\_TIMEOUT:STRING=<seconds>}.  A
+  timeout can also be set on a test-by-test basis with the
+  {}\texttt{TIMEOUT} test property set by the
+  {}\texttt{set\_tests\_properties(...)} command.  This is huge
+  improvement improving the robustness of the testing infrastructure!
 
   \end{enumerate}
 
@@ -959,7 +963,7 @@ include:
 
     \begin{itemize}
 
-    {}\item The ``Comm'' (i.e. 'mpi' or 'serial') [Done
+    {}\item The ``Comm'' (i.e. 'mpi' or 'serial') [Done]
 
     {}\item Selection/defintion of test based on the number of allowed
     MPI processors for the test and the global machine max number of
@@ -1057,27 +1061,36 @@ achieve:
   be supported in each pacakge and at the global Trilinos level. [Done]
 
   {}\item Remove all duplication in header file paths, library paths
-  and libraries
+  and libraries (Ross B.)
 
   {}\item Build all test and example executables with exact same names
   in the same locations as is being done with existing autotools
-  system
+  system (Ross B.)
 
   {}\item Add full ctest testing support for all current tests and
   examples the same as is defined and being performed with the current
-  PACKAGES/test/definition files
+  PACKAGES/test/definition files (Ross)
 
-  {}\item Get a CDash dashboard up and running controled by Trilinos
-  developers and get nightly testing with a cron scirpt going.
+  {}\item Test installing Trilinos heades and libraries and create
+  same structure as existing Trilinos system (Ross B.)
 
-  {}\item Make the default 'make' target just build libraries and add
-  'tests' and 'examples' targets just like the current autotools
-  system does
+  {}\item Implement automatic dependancy tracking facility for
+  required and optional dependancies and recursive enables and
+  disables (Ross B.)
 
   {}\item Implement and demonstrate the generation of export makefiles
   in the same exact way the current autotools system
   does\footnote{Specifically requested by Mike Heroux and Roger
-  Pawloski}
+  Pawloski} (Ross B.)
+
+  {}\item Get a CDash dashboard up and running controled by Trilinos
+  developers and get nightly testing with a cron scirpt going. (Esteban G.)
+
+  {}\item Add Windows and MAC nightly testing for Trilinos/CMake. (Esteban G.)
+
+  {}\item (Low priority) Make the default 'make' target just build
+  libraries and add 'tests' and 'examples' targets just like the
+  current autotools system does (Ross B.)
 
   {}\item (Low priority) Implement two-state configuration and
   building to support circular dependancies between tests/examples and
@@ -1087,7 +1100,7 @@ achieve:
 
 {}\item Expand CMake/CTest support to the packages rtop, epetraext,
 thyra, amesos, ifpack, aztecoo, stratimikos, CTrilinos, and
-ForTrilinos (optionally).
+ForTrilinos (optionally). (Ross B.)
 
 This list of packages will bring a number of new issues into play
 (e.g. different capitalization of package directories, Fortran 2003
@@ -1098,19 +1111,29 @@ library dependancies issue.
 
   \begin{enumerate}
 
-  {}\item Shared library support on Linux and other platforms
-
-  {}\item Building MS Visual Studio projects on MS Windows
-
   {}\item CTest time-out feature killing MPI tests (see if OpenMPI
-  brings down orphaned processes or not)
+  brings down orphaned processes or not) (Ross B.) [Done]
 
-  {}\item Full dependancy tracking on various platforms
+  {}\item Shared library support on Linux and other platforms (Ross B.)
+
+    \begin{itemize}
+
+    {}\item Look into rebuilds for changing *.cpp files and impact on
+    relinking.  CMake should not be relinking executables when just a
+    *.o file changes in a shared library.  If CMake is relinking, we
+    need to find out if this is really needed or if this is a bug in
+    CMake.
+
+    \end{itemize}
+
+  {}\item Full dependancy tracking on various platforms (Ross B.)
+
+  {}\item Building MS Visual Studio projects on MS Windows (Esteban G.)
 
   {}\item Using CPack to create binary serial distribution for MS
   Windows (e.g.\ installed headers and libraries, and/or Visual Studio
   project files, etc.)\footnote{Specifically requested by Mike
-  Heroux.}
+  Heroux.} (Esteban B.)
 
   \end{enumerate}
 
@@ -1135,9 +1158,31 @@ benefit for Trilinos.
 
 \begin{enumerate}
 
-{}\item\textit{Strongly desired}: CMake: Generate error messages that
-have line numbers in the corresponding CMakeLists.txt file.
-Currently, it just lists the file name.
+{}\item\textit{Strongly desired}: CMake: Generate error messages for
+missing source files that have line numbers in the corresponding
+CMakeLists.txt file.  Currently, it just lists the entire
+CMakeLists.txt file and nothing else.
+
+
+
+{}\item ctest: Default outputting issues:
+
+  \begin{itemize}
+  
+  {}\item\textit{Strongly desired}: ctest: Allow the width of the
+  output to be expanded so as to not write over long test
+  names. Currently you can't differentiate between different tests in
+  many cases.
+  
+  {}\item\textit{Desired}: ctest: Print the time for each test (not
+  just the start and end times in the log file).
+
+  \end{itemize}
+
+{}\item\textit{Strongly desired}: CTest: Show what the test criteria
+is and why a test passed or failed in the test output in
+Testing/Temporary/LastTest.log.  Currently, it does not show if the
+test passed or failed, just what the output is.
 
 {}\item\textit{Strongly desired}: CMake/CTest: Support for keywords
 for tests.  This could be added with a {}\texttt{KEYWORDS} field for
