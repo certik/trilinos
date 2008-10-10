@@ -385,11 +385,18 @@ functionality
   scripting.
 
   {}\item CMake: CMake has its own scripting language that is fairly
-  general and fairly compact.  It appears to be a full featured
-  language that would seem to be ``turning complete'' which includes
-  the ability to define lists and loops over those lists and create
-  arbitrary new functions (call macros).  The CMake scripting
-  language does seem to be a little too implicit for my liking.
+  general and fairly compact for basic usage.  It appears to be a full
+  featured language that would seem to be ``turning complete'' which
+  includes the ability to define lists and loops over those lists and
+  create arbitrary new functions (call macros).  You can debug CMake
+  scripts by putting in MESSAGE(...) calls where are the equivalent to
+  print statements.
+
+  {}\textit{Disclaimers}: The CMake scripting language is a little
+  strange though.  Also, the varible scoping rules involving cache and
+  non-cache varibles are very confusing and make it difficult to
+  implement complex logic.  However, CMake is still many times better
+  than autotools and that is what we are comparing to.
 
   \end{enumerate}
 
@@ -1236,6 +1243,9 @@ for SIERRA + Trilinos Integration test repository.
 
   {}\item Improved mechanism for extending capabilities (as compared
   to M4 in autotools)
+
+  {}\item One hundred percent automated interpackage dependency
+  tracking and handling
 
   {}\item ???
 
