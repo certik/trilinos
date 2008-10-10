@@ -425,7 +425,10 @@ functionality
   means only having to get the CMake source and install it (version
   2.6 is currently required but 2.7 is needed for correct CDash
   reporting).  That is better than having to get two different
-  programs with different versions for automake and autoconf.
+  programs with different versions for automake and autoconf.  Also,
+  as long as you have a recent version of CMake (currentl 2.6 or
+  newer), you can use any version you would like (including the CVS
+  version).
 
   \end{enumerate}
 
@@ -481,22 +484,6 @@ existing perl test harness}
 
 \begin{enumerate}
 
-{}\item Defining different tests with same the executable but
-different sets of test arguments:
-
-  \begin{enumerate}
-
-  {}\item Perl test harness: This is well supported and easy to do.
-
-  {}\item CMake/CTest: This is supported by the 'add\_test' command
-  but is not supported by the current CMake macro
-  TRILINOS\_ADD\_EXECUTABLE(...) but could be supported by maybe
-  rename up TRILINOS\_ADD\_EXECUTABLE(...) to be
-  TRILINOS\_ADD\_EXECUTABLE\_AND\_TEST(...) split up to call
-  TRILINOS\_ADD\_EXECUTABLE(...) and TRILINOS\_ADD\_TEST(...).
-
-  \end{enumerate}
-
 {}\item Selection of subsets of tests using keywords:
 
   \begin{enumerate}
@@ -547,12 +534,14 @@ package:
   \begin{enumerate}
 
   {}\item Perl test harness: Handed with 'HOST' and 'X-HOST' options
-  in a very clean way.
+  in a very clean way with 'uname -n' but it is not very portable (for
+  example, does not work on the MAC).
 
-  {}\item CMake: No direct support but could be implemented using
-  system introspection in a CMake macro?  $=>$ Platform includes and
-  excludes would have to be added to a new TRILINOS\_ADD\_TEST(...
-  HOSTS host1 host2 XHOST host1 host2 ) macro?
+  {}\item CMake: This is trivially handled with a HOST and XHOST
+  argument with the new TRILINOS\_ADD\_TEST(...) macro.  Actually,
+  this is more portable since it relies on the built-in
+  SITE\_NAME(...) command in CMake and not the non-portable 'uname -n'
+  command.
 
   \end{enumerate}
 
@@ -595,7 +584,7 @@ test harness}
   currently working?
 
   {}\item CMake/CTest: Built-in support and is run on many platforms
-  by lots of other groups.  This can be run with:
+  by lots of other groups.  This can be run in local build with:
 
     \begin{verbatim}
       ctest -T memcheck
@@ -760,8 +749,9 @@ programs and/or criteria to determine test success or failure
   console output.  There is also the compareOutput that is not
   enough.
 
-  {}\item CMake/CTest: No direct support but you could define a
-  CMake macro for CTest to do this?
+  {}\item CMake/CTest: No direct support but you could do this behind
+  the scenes of the TRILINOS\_ADD\_TEST(...) macro in a way that was
+  100\% transparent.
 
   \end{enumerate}
 
@@ -774,78 +764,15 @@ programs and/or criteria to determine test success or failure
   to be able to disable packages that fail to compile and then
   disable optional support in the other packages.
 
-  {}\item Perl test harness: This is supported.
+  {}\item Perl test harness: This is supported but it requires a lot
+  of manual work to maintain the package dependencies and the
+  completion banners in every package.
 
-  {}\item CMake/CTest: This is not supported but perhaps could be
-  implemented inside of an advanced CTest script (see Section 10.9
-  in {}\cite{MasteringCMake_fourth}).
-
-  \end{enumerate}
-
-\end{enumerate}
-
-
-
-%
-\section{Issues with the current Trilinos/CMake system}
-%
-
-\begin{enumerate}
-
-{}\item Build system Issues
-
-  \begin{enumerate}
-
-  {}\item 'Debug' configuration is not supported by current CMake
-  system in Trilinos
-
-    \begin{itemize}
-
-    {}\item TODO: We can put in logic to check CMAKE\_BUILD\_TYPE and
-    add more define macros (e.g. TEUCHOS\_DEBUG).
-
-    \end{itemize}
-
-  {}\item Circular dependencies between tests/examples and other
-  packages is not supported ... Default top-level 'make' must build
-  all libraries before building tests and examples ...
-
-  {}\item Build system is not scalable or use the
-  ``one-definition-rule'' ... There is lots of redundancy in library
-  names, include paths, etc. ...
-
-  {}\item CMake system does not put in logic for required enables
-  (e.g. enabling anasazi does not enable epetra or teuchos).
-
-  {}\item There is a lot of logic in the top-level CMakeLists.txt file
-  that looks like might be better distributed into the various
-  package's CMakeLists.txt files?
-
-  {}\item There is too much clutter and duplication in the
-  CMakeLists.txt for for tests and examples to handle MPI and other
-  issues ... We need to be able to just list the minimum and have the
-  rest taken care of ...
-
-  {}\item Fortran 2003 support?
-
-  \end{enumerate}
-
-{}\item Testing Issues
-
-  \begin{enumerate}
-
-  {}\item Examples are not being tested (they must be tested as well
-  as being built)
-
-  {}\item There is no way to run a test with more than one set of test
-  arguments (we need to support running test and example executables
-  with multiple sets of command-line arguments and we need different
-  names for each test case that gets reported).  $=>$ This can be
-  handled by the implementation of a TRILINOS\_ADD\_TEST(...) macro.
-
-  {}\item Keywords of some type need to be supported (okay, the name
-  of the package is in there but that is not really enough) ... This
-  appears to be a fundamental deficiency of CMake/CTest.
+  {}\item CMake/CTest: This is not supported but intra-package
+  dependence tracking has been implemented using the scripting
+  language.  An advanced CTest script (see Section 10.9 in
+  {}\cite{MasteringCMake_fourth}) could be written to drive the entire
+  process.
 
   \end{enumerate}
 
@@ -889,42 +816,12 @@ Two options:
 
   \end{itemize}
 
-Group's suggested approach: Have each package just read and write
-global varaibles for PACKAGE\_INCLUDE\_DIRS and PACKAG\_LIBS set up at
-the global level.  Then, packages can be configured and built
-independently by passing in the needed cache variables.  TODO: Set up
-example to prove that this works with a) Dakota, b) Acro, c) simple
-example in Trilinos to test this?
-
-{}\item Deal with issue of different cases for package names and their
-directory names.  We might just define a double entry list like:
-
-\begin{verbatim}
-
-# Package name and its package directory name
-SET( PACKAGES
-  Teuchos teuchos
-  Epetra epetra
-  ...
-  ForTrilinos ForTrilinos
-  MOOCHO moocho
-  )
-LIST(LENGTH PACKAGES PACKAGES_LEN)
-MATH(EXPR NUM_PACKAGES "${PACKAGES_LEN}/2")
-
-
-...
-
-MATH(EXPR PACKAGES_MAX_IDX "${NUM_PACKAGES} - 1")
-FOREACH(PACKAGE_IDX RANGE 0 ${PACKAGES_MAX_IDX})
-  MATH(EXPR PACKAGE_NAME_IDX "2*${PACKAGE_IDX}")
-  MATH(EXPR PACKAGE_DIR_IDX "2*${PACKAGE_IDX}+1")
-  LIST(GET PACKAGES ${PACKAGE_NAME_IDX} PACKAGE_NAME)
-  LIST(GET PACKAGES ${PACKAGE_DIR_IDX} PACKAGE_DIR)
- ...
-ENDFOREACH()
-
-\end{verbatim}
+Suggested approach: Have each package just read and write global
+varaibles for PACKAGE\_INCLUDE\_DIRS and PACKAGE\_LIBS set up at the
+global level.  Then, packages can be configured and built
+independently by passing in the needed cache variables.  This is
+essentially what has been done but we have not tested building
+packages independently yet.
 
 {}\item Refactor and break about the TRILINOS\_ADD\_EXECUTABLE(...) 
 script to separate add\_target(...) and add\_test(...) commands.
@@ -985,8 +882,8 @@ include:
    [Done]
 
   {}\item Allow passthrough of all of the set\_test\_properties(...) 
-  command for WILL\_FAIL, PASS\_REGULAR\_EXPRESSION (Done), and
-  FAIL\_REGULAR\_EXPRESSION [Mostly done].
+  command for WILL\_FAIL, PASS\_REGULAR\_EXPRESSION, and
+  FAIL\_REGULAR\_EXPRESSION [Done].
 
   {}\item (Low priority) Put in support for the compareTestOutput
   program and other post-processing programs that look at test output.
@@ -1015,17 +912,10 @@ Here is what an example of the refactored macros might look like:
 
 \begin{verbatim}
 
-# Just define the exec target ./MemoryManagement/ArrayRCP_test.exe
 TRILINOS_ADD_EXECUTABLE(ArrayRCP_test
   DIRECTORY MemoryManagement
-  SOURCES ArrayRCP_test.cpp
-  )
-
-# Define the tests that will run ./MemoryManagement/ArrayRCP_test.exe
-TRILINOS_ADD_TEST(ArrayRCP_test # The name of the executable (required)
   NAME ArrayRCP_test # Name of the test (defalts to executable name)
   DIRECTORY MemoryManagement
-  DESEND_INTO_DIR
   XHOST S859352.sandia.gov # Run on all hosts except this one
   KEYWORDS unit framework install
   PASS_REGULAR_EXPRESSION "All Tests PASSED"
@@ -1034,8 +924,8 @@ TRILINOS_ADD_TEST(ArrayRCP_test # The name of the executable (required)
   ARGS "--verbose --n=1" "--n=2" "--n=4"
   )
 
-# Above, add_test(...) would define the tests ArrayRCP_test_00,
-# ArrayRCP_test_01, and ArrayRCP_test_02.
+# Above, add_test(...) would define the tests ArrayRCP_test_0,
+# ArrayRCP_test_1, and ArrayRCP_test_2.
 
 TRILINOS_ADD_TEST(ArrayRCP_test
   NAME ArrayRCP_test_big
@@ -1047,15 +937,16 @@ TRILINOS_ADD_TEST(ArrayRCP_test
   ARGS "--n=500" "--n=1000"
   )
 
-# Above, add_test(...) would define the tests ArrayRCP_test_big_00,
-# ArrayRCP_test_big_01
+# Above, add_test(...) would define the tests ArrayRCP_test_big_0,
+# ArrayRCP_test_big_1
 
 \end{verbatim}
 
 It is critically important that the TRILINOS\_ADD\_TEST(...) macro be
 very flexible and full featured as it needs to replace the current
 perl-based test harness PACKAGE/test/defintion file entries.  Also, it
-will be difficult to change once a lot of tests have been defined.
+will be difficult to change once a lot of tests have been
+defined. [Done]
 
 {}\item Bring the current Trilinos/CMake support in the existing
 CMake-ified packages up to spec with the above requirements and to
@@ -1065,35 +956,40 @@ achieve:
 
   {}\item Put in custom targets 'runtest-serial' and 'runtest-mpi' to
   invoke the perl 'runtest' script to run tests.  These targets must
-  be supported in each pacakge and at the global Trilinos level. [Done]
+  be supported in each pacakge and at the global Trilinos
+  level. [Done]
 
   {}\item Remove all duplication in header file paths, library paths
-  and libraries (Ross B.)
+  and libraries (Ross B.) [Done]
 
   {}\item Build all test and example executables with exact same names
   in the same locations as is being done with existing autotools
-  system (Ross B.)
+  system (Ross B.) [Done]
+
+  {}\item Implement automatic dependancy tracking facility for
+  required and optional dependancies and recursive enables and
+  disables (Ross B.) [Done]
 
   {}\item Add full ctest testing support for all current tests and
   examples the same as is defined and being performed with the current
-  PACKAGES/test/definition files (Ross)
+  PACKAGES/test/definition files (Ross) ... Not done yet but not hard
+  ...
 
   {}\item Test installing Trilinos heades and libraries and create
   same structure as existing Trilinos system (Ross B.)
 
-  {}\item Implement automatic dependancy tracking facility for
-  required and optional dependancies and recursive enables and
-  disables (Ross B.)
-
-  {}\item Implement and demonstrate the generation of export makefiles
-  in the same exact way the current autotools system
-  does\footnote{Specifically requested by Mike Heroux and Roger
-  Pawloski} (Ross B.)
-
   {}\item Get a CDash dashboard up and running controled by Trilinos
-  developers and get nightly testing with a cron scirpt going. (Esteban G.)
+  developers and get nightly testing with a cron scirpt
+  going. (Esteban G.)
 
-  {}\item Add Windows and MAC nightly testing for Trilinos/CMake. (Esteban G.)
+  {}\item Add Windows, MAC, and Linux nightly testing for
+  Trilinos/CMake (Esteban G.)
+
+  {}\item (Lower priority just because it is a slam dunk with no risk)
+  Implement and demonstrate the generation of export makefiles in the
+  same exact way the current autotools system
+  does\footnote{Specifically requested by Mike Heroux and Roger
+  Pawloski} (Ross B.) ... This is *not* going to be hard ...
 
   {}\item (Low priority) Make the default 'make' target just build
   libraries and add 'tests' and 'examples' targets just like the
@@ -1121,6 +1017,9 @@ library dependancies issue.
   {}\item CTest time-out feature killing MPI tests (see if OpenMPI
   brings down orphaned processes or not) (Ross B.) [Done]
 
+  {}\item Building MS Visual Studio projects on MS Windows (Esteban
+  G.) [Done]
+
   {}\item Shared library support on Linux and other platforms (Ross B.)
 
     \begin{itemize}
@@ -1131,11 +1030,11 @@ library dependancies issue.
     need to find out if this is really needed or if this is a bug in
     CMake.
 
+    {}\item Look into a 'libs' target to avoid relinks.
+
     \end{itemize}
 
   {}\item Full dependancy tracking on various platforms (Ross B.)
-
-  {}\item Building MS Visual Studio projects on MS Windows (Esteban G.)
 
   {}\item Using CPack to create binary serial distribution for MS
   Windows (e.g.\ installed headers and libraries, and/or Visual Studio
@@ -1172,41 +1071,36 @@ CMakeLists.txt file and nothing else.
 
 
 
-{}\item ctest: Default outputting issues:
+{}\item CTest: Default outputting issues:
 
   \begin{itemize}
-  
-  {}\item\textit{Strongly desired}: ctest: Allow the width of the
-  output to be expanded so as to not write over long test
-  names. Currently you can't differentiate between different tests in
-  many cases.
+
+  {}\item\textit{Desired}: Show what the test criteria is and why a
+  test passed or failed in the test output in
+  Testing/Temporary/LastTest.log.  Currently, it does not show if the
+  test passed or failed, just what the output is.
   
   {}\item\textit{Desired}: ctest: Print the time for each test (not
   just the start and end times in the log file).
 
   \end{itemize}
 
-{}\item\textit{Strongly desired}: CTest: Show what the test criteria
-is and why a test passed or failed in the test output in
-Testing/Temporary/LastTest.log.  Currently, it does not show if the
-test passed or failed, just what the output is.
-
 {}\item\textit{Strongly desired}: CMake/CTest: Support for keywords
-for tests.  This could be added with a {}\texttt{KEYWORDS} field for
-the {}\texttt{add\_test(...)} command (e.g. {}\texttt{add\_test(
-... KEYWORDS keyword1 keyword2 ... )}) or could be supported with a
-{}\texttt{KEYWORDS} property for an existing test (this would not
-break any existing add\_test(...) uses where KEYWORDS might be a
-command-line argument).  {}\textit{Work around}: Simply append all of
-the keywords to the name of the test (not the executable).
+for tests.  This could be added with a {}\texttt{KEYWORDS} property
+for the {}\texttt{set\_tests\_properties(...)} command
+(e.g. {}\texttt{add\_test( ... KEYWORDS keyword1 keyword2 ... )}) 
+{}\textit{Work around}: Simply append all of the keywords to the name
+of the test (not the executable).
 
 {}\item\textit{Desired:} CMake: Strong checking for variables that are
 not defined.  Just letting undefined variables be empty is a bad
-practice (used by Make and bad Fortran).
+practice (used by Make and bad Fortran). {}\textit{Work around}: Use
+an {}\texttt{ASSERT\_DEFINED(...)} macro.
 
 {}\item\textit{Desired:} CTest/CDash: Submit all test data (no matter
-the size) and then pruning test results over time.  This is being done
-for SIERRA + Trilinos Integration test repository.
+the size) and then pruning test results over time.  This includes
+files that get output as well.  This is being done for SIERRA +
+Trilinos Integration test repository.
 
 \end{enumerate}
 
@@ -1238,11 +1132,17 @@ for SIERRA + Trilinos Integration test repository.
   {}\item Support for MS Windows (i.e.\ Visual Studio projects,
   Windows installers, etc.)
 
-  {}\item Simplified build system and easier maintenance (easier to
-  add new packages and maintain existing packages)
+  {}\item Simplified build system and easier maintenance (extremely
+  easy to add new packages and maintain existing packages)
 
   {}\item Improved mechanism for extending capabilities (as compared
   to M4 in autotools)
+
+  {}\item Ability to affect the development of the build tools
+  and good existing collaborations
+
+  {}\item Significant ``in house'' knowledge-base (i.e.\ visualization
+  people in 1420)
 
   {}\item One hundred percent automated interpackage dependency
   tracking and handling
@@ -1251,7 +1151,7 @@ for SIERRA + Trilinos Integration test repository.
 
   \end{enumerate}
 
-{}\item What we loose:
+{}\item What we loose (at least initally):
 
   \begin{enumerate}
 
@@ -1276,17 +1176,18 @@ harness to CTest/CDash test system}
 
   \begin{enumerate}
 
-  {}\item Test time-outs. (this is a major maintance issue for the
-  current perl-based test harness).
+  {}\item Test time-outs (this is a major maintance issue for the
+  current perl-based test harness)
 
   {}\item Memory testing with valgrind and purify that is backed up by
   Kitware and a larger development community
 
-  {}\item Line coverage testing that is backed up by Kitware and a larger
-  development community
+  {}\item Line coverage testing that is backed up by Kitware and a
+  large development community
 
-  {}\item Better support for selecting and excluding subsets of tests
-  based on keywords
+  {}\item Support for selecting and excluding subsets of tests based
+  on regular expresions (but better support for keywords would be
+  welcomed)
 
   {}\item ???
 
@@ -1319,21 +1220,20 @@ The potential gains for switching from the current autools build
 system to a CMake build system summarized above are overwhelming.
 Therefore, our recommendation is to transition all of Trilinos to the
 new CMake-based build system and completely drop the current autotools
-build system as soon as possible after the Trilinos 9.0 release is
-finished.
+build system as soon as possible.
 
-There are also significant advantages to going with a CTest/CDash
+There are also significant advantages to supporting the CTest/CDash
 based test harness as summarized above.  However, some features
 supported by the home-grown perl-based test harness will take
 considerable time and effort to replicate with CTest/CDash.
 Therefore, our recommandation is to maintain test suites for both
 CTest/CDash and the perl-based test harness until such time that the
-infrastructure around CTest/CDash sifficiently supports the
+infrastructure around CTest/CDash sufficiently supports the
 compartmentalization of test results archiving and reporting.  This
-means maintaining each packages test/defintion file, and adding
+means maintaining each package's test/defintion file, and adding
 TRILINOS\_ADD\_TEST(...) calls in CMakeLists.txt files.  By
 maintaining both testing systems, we will have the best of both worlds
-but at the cost of needing to maintain to test systems for some time.
+but at the cost of needing to maintain two test systems for some time.
 
 
 % ---------------------------------------------------------------------- %
