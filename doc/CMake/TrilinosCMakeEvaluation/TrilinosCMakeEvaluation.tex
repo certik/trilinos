@@ -32,7 +32,7 @@ Trilinos CMake Evaluation
 % Set some things we need for SAND reports. These are mandatory
 %
 \SANDnum{SAND2008-xxx}
-\SANDprintDate{June 2008}
+\SANDprintDate{xxx 2008}
 \SANDauthor{Roscoe A. Bartlett, Daniel M. Dunlavy, Guillen J. Esteban, Tim Shead}
 
 % ---------------------------------------------------------------------------- %
@@ -65,6 +65,8 @@ Trilinos CMake Evaluation
 \begin{abstract}
 %
 Autotools is terrible. We need something better.  How about CMake?
+Here we document our evaluation of CMake as the build system and
+testing infrastructure.
 %
 \end{abstract}
 %
@@ -132,8 +134,12 @@ Autotools is terrible. We need something better.  How about CMake?
 \section{Introduction}
 %
 
-Blah, blah, blah ...
-
+Here, we summarize a detailed evaluation of the CMake set of build and
+testing tools as a possible replacement for the current
+autotools-based and home-grown perl-based test harness.  This
+evaluation includes the development of a comprehensive protype build
+system for Trilinos using CMake that is very representative of what a
+final system would look like.
 
 %
 \section{Build Capabilities and Features}
@@ -163,9 +169,9 @@ existing autotools system}
 
   \begin{enumerate}
 
-  {}\item Autotools: Fully supported?
+  {}\item Autotools: Fully supported on all platforms
 
-  {}\item CMake: Fully supported?
+  {}\item CMake: Fully supported on all platforms
 
   \end{enumerate}
 
@@ -183,10 +189,10 @@ locations only defined once
   Trilinos (with a few shameful exceptions) uses the export
   makefiles to get all of these.  There is no duplication.
 
-  {}\item CMake: Chapter 7 in {}\cite{MasteringCMake_fourth}
-  describes a system would this should be well supported but it does
-  not appear the current Trilinos/CMake system has fully embraced
-  this.
+  {}\item CMake: The prototype CMake build system handles all
+  dependences automatically with only simple intra-package dependency
+  lists.  There is no duplication at all whatsoever and is much
+  cleaner than the current autotools system.
 
   \end{enumerate}
 
@@ -213,8 +219,9 @@ locations only defined once
 
   {}\item Autotools: Yes, because everything is manual.
 
-  {}\item CMake: New feature in CMake but seems untested in our
-  environment?
+  {}\item CMake: Cross compiling is a new feature in CMake and it is
+  unclear how well tested this in in our environment but 1420 has had
+  some success with this on reddish/redstorm.
 
   \end{enumerate}
 
@@ -312,15 +319,17 @@ different packages
   later in the build tree.
 
   {}\item Autotools: The default target for 'make' just builds
-  libraries and the 'tests', 'examples', and 'everything' targets
-  make all libraries before any tests or examples are linked.  The
-  support for this with autotools is less than straightforward.
+  libraries and the 'tests', 'examples', and 'everything' targets make
+  all libraries before any tests or examples are linked.  The support
+  for this with autotools is less than straightforward.  However,
+  support for these types of circular dependences has proven to make
+  the current system fragile is not scaling well.
 
-  {}\item CMake: There does not seem to be any direct support for
-  this but perhaps this could be implemented in a clean way? 
-  Options: a) Single pass configure with jumps to up-stream
-  libraries, b) two pass, one for dependencies, second for the rest
-  (e.g. libraries, tests, examples etc.)
+  {}\item CMake: The current CMake build system prototype does not
+  support cicular dependences between tests/examples and later package
+  libraries.  However, it is not clear that this feature is worth
+  preserving.  Instead, we can put such problem-some tests/exapmles
+  into packages like TrilinosCouplings or others.
 
   \end{enumerate}
 
@@ -339,14 +348,33 @@ different packages
   The Python-based system for creating shared libraries on Linux is
   not well characterized.
 
-  {}\item CMake: Shared library support with CMake is advertised to
-  be very strong (see Section 4.8 in
-  {}\cite{MasteringCMake_fourth}).  Experience with shared libraries
-  with CMake in our computing environment includes Linux, Mac OS,
-  and Windows (but with some extra work in the CMakeLists.txt
-  files).  If shared libraries don't work on a platform, you can
-  just switch back to static libraries and that is pretty
-  fool-proof.
+  {}\item CMake: Shared library support with CMake is advertised to be
+  very strong (see Section 4.8 in {}\cite{MasteringCMake_fourth}).
+  Experience with shared libraries with CMake in our computing
+  environment includes Linux, Mac OS, and Windows (but with some extra
+  work in the CMakeLists.txt files).  If shared libraries don't work
+  on a platform, you can just switch back to static libraries and that
+  is pretty fool-proof.
+  
+  {}\textit{Caveat:} Currently, at least for the makefile generator,
+  changes in {}\texttt{*.cpp} files that result in the recreation of a
+  shared library also result in unecessary relinking of all dependent
+  test and example executables.  This is unfortunate but
+  understandable given that makefiles are being used and this type of
+  logic is not supported by 'make'.  {}\textit{Work around}: We can
+  add a 'libs' target that will result in only libraries being rebuilt
+  and then a developer can just to 'make libs' followed by 'ctest' and
+  avoid relinking.  However, if other code does need to be rebuilt,
+  then that will result in inconsistent executbles and therefore
+  inaccurate test results.  However, it may be possible to devise a
+  general system of manipulating time stamps when shared libraries are
+  used so that we can avoid relinking executables when we don't need
+  to.  For example, we could perform a {}\texttt{make libs}, sleep for
+  a second, touch all of the {}\texttt{*.exe} files, and then make all
+  the rest of the targets.  In this way, if header files have been
+  updated, all other {}\texttt{*.cpp} files associated with tests and
+  example executables would get rebuilt and the necessary relinking
+  would automatically occur.
 
   \end{enumerate}
 
@@ -365,8 +393,7 @@ options, include directories, libraries etc. to external clients:
   Makefile.package.export and Makefile.package.export.macros in the
   \$prefix/install directory.
 
-  {}\item CMake: This can be supported in some way with CMake to
-  generate export makefile fragments.
+  {}\item CMake: This will be easy to support.
 
   \end{enumerate}
 
@@ -393,10 +420,10 @@ functionality
   print statements.
 
   {}\textit{Disclaimers}: The CMake scripting language is a little
-  strange though.  Also, the varible scoping rules involving cache and
-  non-cache varibles are very confusing and make it difficult to
-  implement complex logic.  However, CMake is still many times better
-  than autotools and that is what we are comparing to.
+  strange.  For one, the varible scoping rules involving cache,
+  internal cache, and non-cache varibles are very confusing and make
+  it difficult to implement complex logic.  However, CMake is still
+  many times better than autotools for which we are comparing.
 
   \end{enumerate}
 
@@ -417,7 +444,8 @@ functionality
   SCICO LAN).  Also, whenever you changed any Makefile.am file or
   configure.ac file, you need to remember to run ./bootscrap in any
   package that you change and at the top level.  It is easy to forget
-  or hassle to run these scripts.
+  or hassle to run these scripts.  An if you don't remember to
+  bootstrap, the build system will not update anything.
 
   {}\item CMake: With CMake there is no intermediate ``bootstrap''
   step.  After the CMake files are modified, they can be directly
@@ -428,7 +456,9 @@ functionality
   programs with different versions for automake and autoconf.  Also,
   as long as you have a recent version of CMake (currentl 2.6 or
   newer), you can use any version you would like (including the CVS
-  version).
+  version).  Finally, if you change any CMake build system file, the
+  next type you type 'make' the build system will automatically
+  reconfigure itself without needing any bootstrap stage.
 
   \end{enumerate}
 
@@ -465,7 +495,13 @@ functionality
   CMake but there will be less flexibility in what packages and
   options are enabled and disabled.  Note, however, that cmake appears
   to be as portable and easy to build from source as GNU Make so this
-  is not a huge extra requirement over the autotools system.
+  is not a huge extra requirement over the autotools system.  Also
+  note that on MS windows, there are binary self-extracting installers
+  for a very nice CMake GUI program that users can just download,
+  double-click to install, and then run.  On MS Windows, if you have
+  the free MS Visual C++ edition, then configuring project files by
+  downloading and installing the Windows version of CMake is really
+  not any harder than downloading a pre-created project file.
 
   \end{enumerate}
 
@@ -499,10 +535,10 @@ existing perl test harness}
   keywords can not be selected and keywords can not be excluded.
 
   {}\item CMake/CTest: While CTest does not directly support keywords,
-  then can be supported with the new TRILINOS\_ADD\_TEST(...) function
-  by simply appending the keywords to the name of the test (not the
-  executable).  Then, 'ctest' support the options -R, -E, and -U for
-  including and excluding sets of keywords.
+  they are emulated with the TRILINOS\_ADD\_TEST(...) function by
+  simply appending the keywords to the name of the test.  Then,
+  'ctest' support the options -R, -E, and -U for including and
+  excluding tests in a very flexible way.
 
   \end{enumerate}
 
@@ -523,9 +559,7 @@ package:
   platforms run, b) email notifications
 
   {}\item CMake/CTest/CDash: This can be done at the CTest scripting
-  level to configure the dashboard but it could be a good bit of
-  work. $=>$ This will be deferred for a later evaluation but must
-  be done to replace the current Trilinos perl-based test harness.
+  level to configure the dashboard but it could be a good bit of work.
 
   \end{enumerate}
 
@@ -538,10 +572,9 @@ package:
   example, does not work on the MAC).
 
   {}\item CMake: This is trivially handled with a HOST and XHOST
-  argument with the new TRILINOS\_ADD\_TEST(...) macro.  Actually,
-  this is more portable since it relies on the built-in
-  SITE\_NAME(...) command in CMake and not the non-portable 'uname -n'
-  command.
+  argument with the TRILINOS\_ADD\_TEST(...) function.  Actually, this
+  is more portable since it relies on the built-in SITE\_NAME(...) 
+  command in CMake and not the non-portable 'uname -n' command.
 
   \end{enumerate}
 
@@ -603,11 +636,11 @@ test harness}
 
   \begin{enumerate}
 
-  {}\item Why this is important: Hanging tests can freeze up the
-  test harness so that no results are sent at all and it requires a
-  lot of manual work to monitor this and to manually kill hanging
-  tests.  Every major test harness used by our APP customers have
-  support for this (e.g. Alegra, Charon, SIERRA, Xyce).
+  {}\item Why this is important: Hanging tests can freeze up the test
+  harness so that no results are sent at all and it requires a lot of
+  manual work to monitor this and to manually kill hanging tests.
+  Every major test harness used by our APP customers have support for
+  this feature (e.g. Alegra, Charon, SIERRA, Xyce).
 
   {}\item Perl test harness: Not currently supported
 
@@ -615,8 +648,10 @@ test harness}
   variable {}\texttt{DART\_TESTING\_TIMEOUT:STRING=<seconds>}.  A
   timeout can also be set on a test-by-test basis with the
   {}\texttt{TIMEOUT} test property set by the
-  {}\texttt{set\_tests\_properties(...)} command.  This is huge
-  improvement improving the robustness of the testing infrastructure!
+  {}\texttt{set\_tests\_properties(...)} command.  This has been
+  tested and verified to work well even with parallel tests (with Open
+  MPI).  This will be a huge in improving the robustness of the
+  testing infrastructure for Trilinos.
 
   \end{enumerate}
 
@@ -642,8 +677,8 @@ test harness}
   with a special test category (i.e. keyword) and run for optimized
   builds?
 
-  {}\item CMake/CTest: No direct support but could be handled in
-  some way? $=>$ Keywords support will help a lot here.
+  {}\item CMake/CTest: Can be very easily supported with a CATEGORIES
+  option with the TRILINOS\_ADD\_TEST(...) function.
 
   \end{enumerate}
 
@@ -652,36 +687,13 @@ test harness}
   \begin{enumerate}
 
   {}\item Why this is important: Running tests is parallel can
-  significantly speed up pre-checking testing and shorted the
-  feedback time from a continuous integration server
+  significantly speed up pre-checking testing and shorten the feedback
+  time from a continuous integration server.
 
   {}\item Perl test harness: No support
 
-  {}\item CMake/CTest: Planned to be added to the next major release
-  of CMake/CTest
-    
-    {\scriptsize\begin{verbatim}
-    List:       cmake
-    Subject:    Re: [CMake] parallel builds for ctest
-    From:       "Alan W. Irwin" <irwin () beluga ! phys ! uvic ! ca>
-    Date:       2008-02-16 19:22:39
-    Message-ID: Pine.LNX.4.60.0802161105280.4080 () ybpnyubfg ! ybpnyqbznva
-    [Download message RAW]
-    
-    On 2008-02-16 12:38-0500 Bill Hoffman wrote:
-    
-    > [...]parallel ctest is on the todo list for this year.  Most likely  it 
-    > will be ctest -j N.   We can not depend on the make system to do the parallel 
-    > stuff, and ctest -j would be useful for all generators.
-    
-    That's excellent news!  The execution of the PLplot tests actually take
-    about the same time to run as (non-parallel) building of PLplot itself. Now
-    we are doing our builds in parallel, convenient parallel testing will be
-    most welcome as well, and I look forward to trying out that new ctest
-    functionality once you are ready.
-    
-    Alan
-    \end{verbatim}}
+  {}\item CMake/CTest: Is being developed in the current CMake
+  development version.
 
   \end{enumerate}
 
@@ -698,8 +710,10 @@ test harness}
   {}\item Perl test harness: No support yet but some experimentation
   has been done?
 
-  {}\item CMake/CTest: Not directly supported but it could be
-  implemented in the native CMake scripting language?
+  {}\item CMake/CTest: Not directly supported but given the
+  flexibility of the CMake scripting language, if it is possible to
+  support this can be supported in the new TRILNOS\_ADD\_TEST(...) 
+  macro.
 
   \end{enumerate}
 
@@ -746,12 +760,12 @@ programs and/or criteria to determine test success or failure
 
   {}\item Perl test harness: The current Trilinos test harness only
   allows you to run one script as the test or a single grep of the
-  console output.  There is also the compareOutput that is not
-  enough.
+  console output.  There is also support for running the compareOutput
+  program but that is not enough.
 
   {}\item CMake/CTest: No direct support but you could do this behind
   the scenes of the TRILINOS\_ADD\_TEST(...) macro in a way that was
-  100\% transparent.
+  100\% transparent with, for example, PASS\_COMMAND arguments.
 
   \end{enumerate}
 
@@ -768,15 +782,232 @@ programs and/or criteria to determine test success or failure
   of manual work to maintain the package dependencies and the
   completion banners in every package.
 
-  {}\item CMake/CTest: This is not supported but intra-package
-  dependence tracking has been implemented using the scripting
-  language.  An advanced CTest script (see Section 10.9 in
-  {}\cite{MasteringCMake_fourth}) could be written to drive the entire
-  process.
+  {}\item CMake/CTest: There is not built-in support for this but
+  intra-package dependence tracking has been implemented in the
+  prototype CMake build system for Trilinos.  An advanced CTest script
+  (see Section 10.9 in {}\cite{MasteringCMake_fourth}) could be
+  written to drive the entire process and the dashboard display could
+  be modified to support this.
 
   \end{enumerate}
 
 \end{enumerate}
+
+%
+\section{Desired enhancements to CMake/CTest/CDash}
+%
+
+Here we list some identified areas of missing support in
+CMake/CTest/CDash that we either strongly need or would be of great
+benefit for Trilinos.
+
+\begin{enumerate}
+
+{}\item\textit{Strongly desired}: CMake/CTest: Support for keywords
+for tests.  This could be added with a {}\texttt{KEYWORDS} property
+for the {}\texttt{set\_tests\_properties(...)} command.
+{}\textit{Work around}: Simply append all of the keywords to the name
+of the test.
+
+{}\item\textit{Desired}: Direct support for running (multiple)
+programs to post-process the output from a test (both the console and
+any ouptut files).  {}\textit{Work around}: This can be emulated
+within the TRILINOS\_ADD\_TEST(...) function by writing script files
+that combine everything but it will be hard to make this portable and
+might make it confusing to trace what is happening.
+
+{}\item CTest: Default outputting issues:
+
+  \begin{itemize}
+
+  {}\item\textit{Desired}: Show what the test criteria is and why a
+  test passed or failed in the test output in
+  Testing/Temporary/LastTest.log.  Currently, it does not show if the
+  test passed or failed, just what the output is.
+  
+  {}\item\textit{Desired}: ctest: Print the time for each test (not
+  just the start and end times in the log file).
+
+  {}\item\textit{Desired}: Automatically widen the output to show the
+  full test names.  Currently, only the first 30 characters of the
+  name are shown.  The option -W was added to the CVS version of CTest
+  to allow the width to be manually set but this is a hassel and does
+  not interact well with MS Visual C++ projects.
+
+  \end{itemize}
+
+{}\item\textit{Desired:} CTest/CDash: Submit all test data (no matter
+the size) and then pruning test results over time.  This includes
+files that get output as well.  This is being done for the SIERRA +
+Trilinos Integration test repository for instance.
+
+{}\item\textit{Desired}: CMake: Generate error messages for missing
+source files that have line numbers in the corresponding
+CMakeLists.txt file.  Currently, it just lists the entire
+CMakeLists.txt file and nothing else.
+
+{}\item\textit{Desired:} CMake: Strong checking for variables that are
+not defined.  Just letting undefined variables be empty is a bad
+practice (used by Make and bad Fortran).  This practice is well known
+to result in higher rates of software defects.  {}\textit{Work
+around}: Use a user-defined {}\texttt{ASSERT\_DEFINED(...)} macro.
+
+\end{enumerate}
+
+
+%
+\section{Summary and Recommendations}
+%
+
+
+%
+\subsection{Gains and losses for switching from autotools to CMake for the build sytem}
+%
+
+\begin{enumerate}
+
+{}\item What we gain:
+
+  \begin{enumerate}
+
+  {}\item Full dependancy tracking of every kind possible on all
+  platforms (i.e.\ header to object, object to library, library to
+  exectuble, and build system files to all other files).
+
+  {}\item Support for shared libraries on a variety of platforms
+
+  {}\item Support for MS Windows (i.e.\ Visual Studio projects,
+  Windows installers, etc.)
+
+  {}\item Simplified build system and easier maintenance (extremely
+  easy to add new packages and maintain existing packages)
+
+  {}\item Improved mechanism for extending capabilities (as compared
+  to M4 in autotools)
+
+  {}\item Ability to affect the development of the build tools and
+  good existing collaborations (i.e.\ with both Kitware and witn 1420)
+
+  {}\item Significant ``in house'' knowledge-base (i.e.\ visualization
+  people in 1420)
+
+  {}\item One hundred percent automated interpackage dependency
+  tracking and handling (built into the prototype Trilinos/CMake build
+  system)
+
+  {}\item ???
+
+  \end{enumerate}
+
+{}\item What we loose (at least initally):
+
+  \begin{enumerate}
+
+  {}\item CMake requires that all uses have 'cmake' installed on their
+  machine when building from source and users will need to have at a
+  very recent version of cmake. (However, cmake is very easy to build
+  from source).
+
+  {}\item Support for circular test/example and package libraries is
+  not provided in the current prototype Trilinos/CMake build system
+
+  \end{enumerate}
+
+\end{enumerate}
+
+
+%
+\subsection{Gains and losses for switching from current perl-based test
+harness to CTest/CDash test system}
+%
+
+\begin{enumerate}
+
+{}\item What we gain:
+
+  \begin{enumerate}
+
+  {}\item Test time-outs (this is a major maintance issue for the
+  current perl-based test harness)
+
+  {}\item Memory testing with valgrind and purify that is backed up by
+  Kitware and a larger development community
+
+  {}\item Line coverage testing that is backed up by Kitware and a
+  large development community
+
+  {}\item Support for selecting and excluding subsets of tests based
+  on regular expresions (but better support for keywords would be
+  welcomed)
+
+  {}\item Better tracking of specific tests (i.e.\ each and every test
+  can have a unique name that is easy to find).
+
+  {}\item ???
+
+  \end{enumerate}
+
+{}\item What we loose (at least initially):
+
+  \begin{enumerate}
+
+  {}\item Separate reporting of test results for different Trilinos
+  packages on the web page and in emails sent out. (however, such
+  support could be layered on top of CTest and CDash).
+
+  {}\item Support for selectively disabling package tests/examples and
+  entire packages when a build fails.  (however, such support could be
+  layered on top of ctest for driving the test harness).
+
+  {}\item ???
+
+  \end{enumerate}
+
+\end{enumerate}
+
+
+%
+\subsection{Final recommendations}
+%
+
+The potential gains for switching from the current autools build
+system to a CMake build system summarized above are overwhelming.
+Therefore, our recommendation is to transition all of Trilinos to the
+new CMake-based build system and completely drop the current autotools
+build system as soon as possible.
+
+There are also significant advantages to supporting the CTest/CDash
+based test harness as summarized above.  However, some features
+supported by the home-grown perl-based test harness will take
+considerable time and effort to replicate with CTest/CDash.
+Therefore, our recommandation is to maintain test suites for both
+CTest/CDash and the perl-based test harness until such time that the
+infrastructure around CTest/CDash sufficiently supports the
+compartmentalization of test results archiving and reporting.  This
+means maintaining each package's test/defintion file, and adding
+TRILINOS\_ADD\_TEST(...) calls in CMakeLists.txt files.  By
+maintaining both testing systems, we will have the best of both worlds
+but at the cost of needing to maintain two test systems for some time.
+
+The current Trilinos/CMake prototype build system is now at a state
+where we believe it can now be pushed out to all of Trilinos.
+
+
+% ---------------------------------------------------------------------- %
+% References
+%
+\clearpage
+\bibliographystyle{plain}
+\bibliography{references}
+\addcontentsline{toc}{section}{References}
+
+
+% ---------------------------------------------------------------------- %
+% Appendices should be stand-alone for SAND reports. If there is only
+% one appendix, put \setcounter{secnumdepth}{0} after \appendix
+%
+\appendix
+
 
 
 %
@@ -1053,196 +1284,6 @@ summary and conclusions are stated below, the Trilinos leaders will
 decide on a course of action regarding replacing the current autotools
 and perl-based test harness with CMake/CTest/CDash/CPack and on a time
 table for doing so.
-
-%
-\section{Desired and required enhancements to CMake/CTest/CDash}
-%
-
-Here we list some identified areas of missing support in
-CMake/CTest/CDash that we either strongly need or would be of great
-benefit for Trilinos.
-
-\begin{enumerate}
-
-{}\item\textit{Strongly desired}: CMake: Generate error messages for
-missing source files that have line numbers in the corresponding
-CMakeLists.txt file.  Currently, it just lists the entire
-CMakeLists.txt file and nothing else.
-
-
-
-{}\item CTest: Default outputting issues:
-
-  \begin{itemize}
-
-  {}\item\textit{Desired}: Show what the test criteria is and why a
-  test passed or failed in the test output in
-  Testing/Temporary/LastTest.log.  Currently, it does not show if the
-  test passed or failed, just what the output is.
-  
-  {}\item\textit{Desired}: ctest: Print the time for each test (not
-  just the start and end times in the log file).
-
-  \end{itemize}
-
-{}\item\textit{Strongly desired}: CMake/CTest: Support for keywords
-for tests.  This could be added with a {}\texttt{KEYWORDS} property
-for the {}\texttt{set\_tests\_properties(...)} command
-(e.g. {}\texttt{add\_test( ... KEYWORDS keyword1 keyword2 ... )}) 
-{}\textit{Work around}: Simply append all of the keywords to the name
-of the test (not the executable).
-
-{}\item\textit{Desired:} CMake: Strong checking for variables that are
-not defined.  Just letting undefined variables be empty is a bad
-practice (used by Make and bad Fortran). {}\textit{Work around}: Use
-an {}\texttt{ASSERT\_DEFINED(...)} macro.
-
-{}\item\textit{Desired:} CTest/CDash: Submit all test data (no matter
-the size) and then pruning test results over time.  This includes
-files that get output as well.  This is being done for SIERRA +
-Trilinos Integration test repository.
-
-\end{enumerate}
-
-
-%
-\section{Summary and Recommendations}
-%
-
-
-%
-\subsection{Gains and losses for switching from autotools to CMake for the build sytem}
-%
-
-\begin{enumerate}
-
-{}\item What we gain:
-
-  \begin{enumerate}
-
-  {}\item Dependancy tracking for header to object files that works on
-  all platforms
-
-  {}\item Full dependancy tracking form libaries to all executable
-  programs
-
-  {}\item Support for shared libraries on a variety of platforms (not
-  the mess that is libtool)
-
-  {}\item Support for MS Windows (i.e.\ Visual Studio projects,
-  Windows installers, etc.)
-
-  {}\item Simplified build system and easier maintenance (extremely
-  easy to add new packages and maintain existing packages)
-
-  {}\item Improved mechanism for extending capabilities (as compared
-  to M4 in autotools)
-
-  {}\item Ability to affect the development of the build tools
-  and good existing collaborations
-
-  {}\item Significant ``in house'' knowledge-base (i.e.\ visualization
-  people in 1420)
-
-  {}\item One hundred percent automated interpackage dependency
-  tracking and handling
-
-  {}\item ???
-
-  \end{enumerate}
-
-{}\item What we loose (at least initally):
-
-  \begin{enumerate}
-
-  {}\item CMake requires that all uses have 'cmake' installed on their
-  machine when building from source and users will need to have at a
-  very recent version of cmake. (However, cmake is very easy to build
-  from source).
-
-  \end{enumerate}
-
-\end{enumerate}
-
-
-%
-\subsection{Gains and losses for switching from current perl-based test
-harness to CTest/CDash test system}
-%
-
-\begin{enumerate}
-
-{}\item What we gain:
-
-  \begin{enumerate}
-
-  {}\item Test time-outs (this is a major maintance issue for the
-  current perl-based test harness)
-
-  {}\item Memory testing with valgrind and purify that is backed up by
-  Kitware and a larger development community
-
-  {}\item Line coverage testing that is backed up by Kitware and a
-  large development community
-
-  {}\item Support for selecting and excluding subsets of tests based
-  on regular expresions (but better support for keywords would be
-  welcomed)
-
-  {}\item ???
-
-  \end{enumerate}
-
-{}\item What we loose:
-
-  \begin{enumerate}
-
-  {}\item Separate reporting of test results for different Trilinos
-  packages on the web page and in emails sent out. (however, such
-  support could be layered on top of CTest and CDash).
-
-  {}\item Support for selectively disabling package tests/examples and
-  entire packages when a build fails.  (however, such support could be
-  layered on top of ctest for driving the test harness).
-
-  {}\item ???
-
-  \end{enumerate}
-
-\end{enumerate}
-
-
-%
-\subsection{Final recommendations}
-%
-
-The potential gains for switching from the current autools build
-system to a CMake build system summarized above are overwhelming.
-Therefore, our recommendation is to transition all of Trilinos to the
-new CMake-based build system and completely drop the current autotools
-build system as soon as possible.
-
-There are also significant advantages to supporting the CTest/CDash
-based test harness as summarized above.  However, some features
-supported by the home-grown perl-based test harness will take
-considerable time and effort to replicate with CTest/CDash.
-Therefore, our recommandation is to maintain test suites for both
-CTest/CDash and the perl-based test harness until such time that the
-infrastructure around CTest/CDash sufficiently supports the
-compartmentalization of test results archiving and reporting.  This
-means maintaining each package's test/defintion file, and adding
-TRILINOS\_ADD\_TEST(...) calls in CMakeLists.txt files.  By
-maintaining both testing systems, we will have the best of both worlds
-but at the cost of needing to maintain two test systems for some time.
-
-
-% ---------------------------------------------------------------------- %
-% References
-%
-\clearpage
-\bibliographystyle{plain}
-\bibliography{references}
-\addcontentsline{toc}{section}{References}
 
 
 \begin{SANDdistribution}[NM]
