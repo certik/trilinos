@@ -1,3 +1,4 @@
+
 \documentclass[pdf,ps2pdf,11pt]{SANDreport}
 \usepackage{pslatex}
 
@@ -65,8 +66,8 @@ Trilinos CMake Evaluation
 \begin{abstract}
 %
 Autotools is terrible. We need something better.  How about CMake?
-Here we document our evaluation of CMake as the build system and
-testing infrastructure.
+Here we document our evaluation of CMake as a build system and testing
+infrastructure to replace the current autotools-based system.
 %
 \end{abstract}
 %
@@ -138,12 +139,18 @@ Here, we summarize a detailed evaluation of the CMake set of build and
 testing tools as a possible replacement for the current
 autotools-based and home-grown perl-based test harness.  This
 evaluation includes the development of a comprehensive protype build
-system for Trilinos using CMake that is very representative of what a
-final system would look like.
+system infrastructure for Trilinos using CMake that is likely very
+representative of what a final system would look like.
+
 
 %
 \section{Build Capabilities and Features}
 %
+
+Here we describe a set of features relateding to building and how they
+are (or are not) supported with the current autotools build system and
+the new CMake prototype system.  These features are subdivided into
+critical and non-critical categories.
 
 
 %
@@ -157,6 +164,8 @@ existing autotools system}
 
   \begin{enumerate}
 
+  {}\item Why this is important: To enable fast and safe rebuilds
+
   {}\item Autotools: Only supported on Linux and very few other
   platforms.  Not support on the Sun, IBM, and SGI
 
@@ -169,6 +178,8 @@ existing autotools system}
 
   \begin{enumerate}
 
+  {}\item Why this is important: To enable fast and safe rebuilds
+
   {}\item Autotools: Fully supported on all platforms
 
   {}\item CMake: Fully supported on all platforms
@@ -176,7 +187,7 @@ existing autotools system}
   \end{enumerate}
 
 {}\item Scalable build system where libraries and header directory
-locations only defined once
+locations are only defined once
 
   \begin{enumerate}
 
@@ -200,6 +211,9 @@ locations only defined once
 
   \begin{enumerate}
 
+  {}\item Why this is important: Trilinos must support a wide set of
+  different platforms.
+
   {}\item Autotools: Autotools generates very portable makefiles.
   However, avoiding ``command-line too long'' errors on many
   platforms requires that one use GNU Make.
@@ -215,13 +229,13 @@ locations only defined once
 
   \begin{enumerate}
 
-  {}\item Why this is important: Building for the big iron (e.g. Red Storm).
+  {}\item Why this is important: Building for the big iron (e.g. Red Storm)
 
   {}\item Autotools: Yes, because everything is manual.
 
   {}\item CMake: Cross compiling is a new feature in CMake and it is
-  unclear how well tested this in in our environment but 1420 has had
-  some success with this on reddish/redstorm.
+  unclear how well tested this in in our environment but organization
+  1420 has had some success with this on reddish/redstorm.
 
   \end{enumerate}
 
@@ -238,10 +252,11 @@ existing autotools system}
 
   \begin{enumerate}
 
-  {}\item Why this is important: We need this for fast
-  rebuild/retest cycles before checkin and faster feedback from
-  continuous integration tests.  Currently, it takes up to 50
-  minutes to relink all the tests and examples in Trilinos.
+  {}\item Why this is important: We need this for fast rebuild/retest
+  cycles before checkin and faster feedback from continuous
+  integration tests.  Currently, it takes up to 50 minutes and longer
+  on a very fast Linux machine to relink all the tests and examples in
+  Trilinos.
 
   {}\item Autotools: No support at all
 
@@ -254,8 +269,8 @@ existing autotools system}
 
   \begin{enumerate}
 
-  {}\item Why this is important: Windows represents a big growth
-  area for Trilinos is and the Tritan project is one example.
+  {}\item Why this is important: Windows represents a big growth area
+  for Trilinos is and the Titain project is one example.
 
   {}\item Autotools: No direct support but cygwin can be used with
   Windows Intel compilers to install headers/libraries.  This is not
