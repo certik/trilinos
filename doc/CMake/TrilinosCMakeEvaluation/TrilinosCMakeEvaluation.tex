@@ -143,6 +143,36 @@ evaluation includes the development of a comprehensive prototype build
 system infrastructure for Trilinos using CMake that is likely very
 representative of what a final system would look like.
 
+The CMake set of configuration, build, test, and reporting tools are
+developed and maintained by Kitware,
+Inc.\footnote{www.kitware.com} The four (4) tools available in the
+current CMake system are as follows:
+
+\begin{itemize}
+ {}\item {\em CMake}: portable build manager that includes a complete
+ scripting language for configuring and building software libraries and
+ executables.
+
+ {}\item {\em CTest}: executable to handle running tests along with a
+ scripting language to control test flows.
+
+ {}\item {\em CPack}: cross-platform software packaging tool, with
+ installer support for all systems currently supported by CMake.
+
+ {}\item {\em CDash}: build and test reporting dashboard built on PHP,
+ CSS, XSL, MySQL, and Apache HTTPD.
+
+\end{itemize} 
+
+Note that although these tools have been developed to work in tandem
+as a complete build and test environment, the components can be used
+independently as well. For example, CMake can be used to configure and
+build a library, and testing can be handled using another set of
+tools. Furthermore, CTest and CDash can be used to handle testing and
+reporting of a software library without using CMake as the build
+manager. This said, it is recommended to use the full
+CMake/CTest/CPack/CDash system as there is more work involved to use
+only parts of the system.
 
 %
 \section{Build Capabilities and Features}
@@ -161,11 +191,11 @@ existing autotools system}
 
 \begin{enumerate}
 
-{}\item Dependency tracking of header files to rebuild object files
+{}\item Dependency tracking of header files to rebuild object files:
 
   \begin{enumerate}
 
-  {}\item Why this is important: To enable fast, safe, and correct rebuilds
+  {}\item Why this is important: To enable fast, safe, and correct rebuilds.
 
   {}\item Autotools: Only supported on Linux and very few other
   platforms.  Not supported on the Sun, IBM, and SGI.
@@ -175,20 +205,20 @@ existing autotools system}
 
   \end{enumerate}
 
-{}\item Dependency tracking of object files to libraries
+{}\item Dependency tracking of object files to libraries:
 
   \begin{enumerate}
 
-  {}\item Why this is important: To enable fast, safe, and correct rebuilds
+  {}\item Why this is important: To enable fast, safe, and correct rebuilds.
 
-  {}\item Autotools: Fully supported on all platforms
+  {}\item Autotools: Fully supported on all platforms.
 
-  {}\item CMake: Fully supported on all platforms
+  {}\item CMake: Fully supported on all platforms.
 
   \end{enumerate}
 
 {}\item Scalable build system where Trilinos package libraries and
-header file directory locations are only defined once
+header file directory locations are only defined once:
 
   \begin{enumerate}
 
@@ -209,7 +239,7 @@ header file directory locations are only defined once
 
   \end{enumerate}
 
-{}\item Build system must be portable to all required platforms
+{}\item Build system must be portable to all required platforms:
 
   \begin{enumerate}
 
@@ -227,7 +257,7 @@ header file directory locations are only defined once
 
   \end{enumerate}
 
-{}\item Cross compiling
+{}\item Cross compiling:
 
   \begin{enumerate}
 
@@ -262,7 +292,7 @@ existing autotools system}
   on a very fast Linux machine to relink a large number of the tests
   and examples in Trilinos.
 
-  {}\item Autotools: No support at all
+  {}\item Autotools: No support at all.
 
   {}\item CMake: This is built into CMake.  This is one of the major
   motivations for going to CMake.
@@ -292,7 +322,7 @@ existing autotools system}
   \end{enumerate}
 
 {}\item Support for multiple languages including Fortran 77, Fortran
-90, and Fortran 2003
+90, and Fortran 2003:
 
   \begin{enumerate}
 
@@ -393,7 +423,7 @@ makefiles:
   \end{enumerate}
 
 {}\item Clean and understandable mechanism for extending
-functionality
+functionality:
 
   \begin{enumerate}
 
@@ -427,7 +457,7 @@ functionality
 
   \end{enumerate}
 
-{}\item Simple development environment
+{}\item Simple development environment:
 
   \begin{enumerate}
 
@@ -460,7 +490,7 @@ functionality
 
   \end{enumerate}
 
-{}\item Simple installation for users
+{}\item Simple installation for users:
 
   \begin{enumerate}
 
@@ -507,7 +537,7 @@ functionality
   \end{enumerate}
 
 {}\item Circular dependencies allowed between tests/examples in
-different packages
+different packages:
 
   \begin{enumerate}
 
@@ -654,7 +684,7 @@ Perl-based test harness}
 
 \begin{enumerate}
 
-{}\item Code coverage
+{}\item Code coverage:
 
   \begin{enumerate}
 
@@ -662,14 +692,14 @@ Perl-based test harness}
   metrics of code quality and of the completeness of tests.
 
   {}\item Perl test harness: Has been supported in the past but not
-  currently
+  currently.
 
   {}\item CMake/CTest: Built-in support and run on many platforms by
   lots of groups.
 
   \end{enumerate}
 
-{}\item Memory usage testing (i.e. Valgrind and/or purify)
+{}\item Memory usage testing (i.e. Valgrind and/or purify):
 
   \begin{enumerate}
 
@@ -677,7 +707,7 @@ Perl-based test harness}
   continue to degrade the quality of our code and they tend to sit
   dormant for long periods of time and don't cause major problems
   until we really need our software to work.  This includes memory
-  leaks, accessing deleted memory, accessing memory with invalid
+  leaks, accessing deleted memory, accessing memory wit.h invalid
   addresses, out-of-bounds errors, etc.
 
   {}\item Perl test harness: Has been supported in the past but not
@@ -703,7 +733,7 @@ Perl-based test harness}
 
   \end{enumerate}
 
-{}\item Automatic timeout of tests
+{}\item Automatic timeout of tests:
 
   \begin{enumerate}
 
@@ -713,7 +743,7 @@ Perl-based test harness}
   Every major test harness used by the Trilinos application customers
   have support for this feature (e.g. Alegra, Charon, SIERRA, Xyce).
 
-  {}\item Perl test harness: Not currently supported
+  {}\item Perl test harness: Not currently supported.
 
   {}\item CMake/CTest: Currently supported with the CMake cache
   variable {}\texttt{DART\_TESTING\_TIMEOUT:STRING=<seconds>}.  A
@@ -735,7 +765,7 @@ Perl-based test harness}
 
 \begin{enumerate}
 
-{}\item Performance testing
+{}\item Performance testing:
 
   \begin{enumerate}
 
@@ -761,7 +791,7 @@ Perl-based test harness}
   significantly speed up pre-checking testing and shorten the feedback
   time from a continuous integration server.
 
-  {}\item Perl test harness: No support
+  {}\item Perl test harness: No support.
 
   {}\item CMake/CTest: This is being developed in the current CMake
   CVS development version (but does not seem to work yet).
@@ -779,7 +809,7 @@ Perl-based test harness}
   efficient way.
 
   {}\item Perl test harness: No support yet but some experimentation
-  has been done
+  has been done.
 
   {}\item CMake/CTest: Not directly supported but given the
   flexibility of the CMake scripting language, if it is possible to
@@ -795,7 +825,7 @@ Perl-based test harness}
 
   \end{enumerate}
 
-{}\item Archiving all test outputs for sufficient periods of time
+{}\item Archiving all test outputs for sufficient periods of time:
 
   \begin{enumerate}
 
@@ -830,7 +860,7 @@ Perl-based test harness}
   \end{enumerate}
 
 {}\item Allowing the specification of any arbitrary number of programs
-and/or criteria to determine the success or failure of a test
+and/or criteria to determine the success or failure of a test:
 
   \begin{enumerate}
 
@@ -982,27 +1012,27 @@ and still maintain the current Perl-based test harness.
   platforms (i.e.\ header to object, object to library, library to
   executable, and build system files to all built files).
 
-  {}\item Support for shared libraries on a variety of platforms
+  {}\item Support for shared libraries on a variety of platforms.
 
   {}\item Support for MS Windows (i.e.\ Visual Studio projects,
-  Windows installers, etc.)
+  Windows installers, etc.).
 
   {}\item Simplified build system and easier maintenance (extremely
-  easy to add new packages and maintain existing packages)
+  easy to add new packages and maintain existing packages).
 
   {}\item Improved mechanism for extending capabilities (as compared
-  to M4 in autotools)
+  to M4 in autotools).
 
   {}\item Ability to affect the development of the build tools with
   good existing collaborations (i.e.\ with both Kitware and with
-  organization 1420)
+  organization 1420).
 
   {}\item Significant ``in house'' knowledge-base (i.e.\ visualization
-  group in 1420)
+  group in 1420).
 
   {}\item One hundred percent automated intra-package dependency
   tracking and handling (built into the prototype Trilinos/CMake build
-  system)
+  system).
 
   \end{enumerate}
 
@@ -1035,21 +1065,21 @@ harness to CTest/CDash test system}
   \begin{enumerate}
 
   {}\item Test time-outs (this is a major maintenance issue for the
-  current Perl-based test harness)
+  current Perl-based test harness).
 
   {}\item Memory testing with Valgrind and purify that is backed up by
-  Kitware and a larger development community
+  Kitware and a larger development community.
 
   {}\item Line coverage testing that is backed up by Kitware and a
-  large development community
+  large development community.
 
   {}\item Support for selecting and excluding subsets of tests based
   on regular expressions (but better support for keywords would be
-  welcomed)
+  welcomed).
 
   {}\item Better integration with the build system (e.g.\ easier to
   support more advanced features like PBS batch systems and flexible
-  testing control)
+  testing control).
 
   {}\item Better tracking of specific tests (i.e.\ each and every test
   can have a unique name that is easy to find).
