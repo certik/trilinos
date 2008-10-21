@@ -8,6 +8,7 @@
 \usepackage[all]{draftcopy}
 \input{rab_commands}
 \newtheorem{theorem}{Theorem}
+\usepackage{hyperref}
 
 % If you want to relax some of the SAND98-0730 requirements, use the "relax"
 % option. It adds spaces and boldface in the table of contents, and does not
@@ -164,7 +165,7 @@ existing autotools system}
 
   \begin{enumerate}
 
-  {}\item Why this is important: To enable fast and safe rebuilds
+  {}\item Why this is important: To enable fast, safe, and correct rebuilds
 
   {}\item Autotools: Only supported on Linux and very few other
   platforms.  Not supported on the Sun, IBM, and SGI.
@@ -178,7 +179,7 @@ existing autotools system}
 
   \begin{enumerate}
 
-  {}\item Why this is important: To enable fast and safe rebuilds
+  {}\item Why this is important: To enable fast, safe, and correct rebuilds
 
   {}\item Autotools: Fully supported on all platforms
 
@@ -221,7 +222,7 @@ header file directory locations are only defined once
 
   {}\item CMake: One needs to have cmake built on the target
   platform but all that is needed to build and install cmake is a
-  fairly recent C++ compilers.  A simple 'configure', 'make', and
+  fairly recent C++ compiler.  A simple 'configure', 'make', and
   'make install' is all that is needed. 
 
   \end{enumerate}
@@ -236,7 +237,7 @@ header file directory locations are only defined once
   {}\item Autotools: Yes, because everything is manual.
 
   {}\item CMake: Cross compiling is a new feature in CMake and it is
-  unclear how well tested this in the Sandia environment.  However,
+  unclear how well tested this is in the Sandia environment.  However,
   organization 1420 has had some success with using this feature with
   Paraview to build for reddish/redstorm.
 
@@ -256,15 +257,15 @@ existing autotools system}
   \begin{enumerate}
 
   {}\item Why this is important: We need this for fast rebuild/retest
-  cycles before checkin and faster feedback from continuous
-  integration builds.  Currently, it takes up to 50 minutes and longer
+  cycles before repository commits and faster feedback from continuous
+  integration builds.  Currently, it takes up to 50 minutes or longer
   on a very fast Linux machine to relink a large number of the tests
   and examples in Trilinos.
 
   {}\item Autotools: No support at all
 
-  {}\item CMake: This is built into CMake.  In my opinion (rabartl),
-  this is one of the major motivations for going to CMake.
+  {}\item CMake: This is built into CMake.  This is one of the major
+  motivations for going to CMake.
 
   \end{enumerate}
 
@@ -273,7 +274,7 @@ existing autotools system}
   \begin{enumerate}
 
   {}\item Why this is important: Windows represents a big growth area
-  for Trilinos is and the Titan project is one example.
+  for Trilinos; the Titan project is one example.
 
   {}\item Autotools: No direct support but cygwin can be used with
   Windows Intel compilers to install headers/libraries.  This is not
@@ -281,8 +282,10 @@ existing autotools system}
 
   {}\item CMake: Direct support for MS Windows and a variety of other
   systems.  This includes creating project files for MS Visual Studio
-  and binary installers using NSIS.  There is lots of experience with
-  this at Sandia for Visual Studio and NMake for native Windows
+  and binary installers using NSIS\footnote{A scriptable win32
+  installer/uninstaller system available at
+  \url{http://nsis.sourceforge.net/}}.  There is lots of experience
+  with this at Sandia for Visual Studio and NMake for native Windows
   binaries.  This is one of the major selling points for CMake over
   the autotools system.
 
@@ -309,12 +312,12 @@ existing autotools system}
   {}\item CMake: It is unclear how well CMake supports Fortran 90+ but
   Chapter 11 in {}\cite{MasteringCMake_fourth} deals with how to add
   new compilers so it seems this could be supported more cleanly than
-  with autotools. On idea is to copy and extend the Fortran 90 macro
+  with autotools. One idea is to copy and extend the Fortran 90 macro
   package for Fortran 2003.  This may be hard to make portable but
   hopefully we would get some help from the CMake community or Kitware.
   Right now Fortran 77 name mangling is determined by platform but it
   will be easy to write a Module/Macro that will figure this out
-  automatically with the try\_compile(...) command.
+  automatically with the \texttt{try\_compile(...)} command.
 
   \end{enumerate}
 
@@ -357,7 +360,7 @@ existing autotools system}
   understandable given that makefiles are being used and this type of
   special shared library logic is not supported by 'make'.
   {}\textit{Work around}: We can add a 'libs' target that will result
-  in only libraries being rebuilt and then a developer can just to
+  in only libraries being rebuilt and then a developer can just use
   'make libs' followed by 'ctest' and avoid relinking.  However, if
   other code related to a test/example also needs to be rebuilt, then
   that will result in inconsistent executables and therefore inaccurate
@@ -383,7 +386,9 @@ makefiles:
   Makefile.package.export and Makefile.package.export.macros in the
   \$prefix/install directory.
 
-  {}\item CMake: This will be easy to support.
+  {}\item CMake: This will be easy to support, and a prototype system
+  is already in place for the LSALIB library currently used in the
+  Titan project.
 
   \end{enumerate}
 
@@ -393,7 +398,7 @@ functionality
   \begin{enumerate}
 
   {}\item Why this is important: We will need to create specialized
-  features form time to time and we need a supported way to do this
+  features form time to time, and we need a supported way to do this
   that is clean and understandable.
 
   {}\item Autotools: Autotools uses the so-called M4 language which
@@ -402,14 +407,14 @@ functionality
   pinch as some wrapper around shell scripting.
 
   {}\item CMake: CMake has its own scripting language that is fairly
-  general and fairly compact for basic usage.  It is a ``turning
+  general and fairly compact for basic usage.  It is a ``Turing
   complete'' (i.e.\ you can write complete programs with it) which
   includes the ability to define lists and loops over those lists and
   create arbitrary new functions (call macros).  Unlike makefiles,
   commands in CMake script files are executed from beginning to end
   with clear programming language semantics.  While there is no CMake
   ``debugger'', you can effectively debug CMake scripts by putting in
-  MESSAGE(...) calls where are the equivalent to print statements.
+  \texttt{MESSAGE(...)} calls which are the equivalent to print statements.
 
   {}\textit{Disclaimers}: The CMake scripting language is a little
   strange.  For one, the variable scoping rules involving cache,
@@ -445,18 +450,13 @@ functionality
 
   {}\item CMake: With CMake there is no intermediate ``bootstrap''
   step.  After the CMake files are modified, you can just type 'make'
-  and the system will reconfigure itself if it needs too. Also, there
+  and the system will reconfigure itself if it needs to do so. Also, there
   are no intermediate files that need to be added to the VS
   repository.  As a developer, this means only having to get the CMake
   source and install it (version 2.6 is currently required but 2.7 is
   needed for correct CDash reporting).  That is better than having to
   get two different programs with different versions for automake and
-  autoconf.  Also, as long as you have a recent version of CMake
-  (currently 2.6 or newer), you can use any version of CMake that you
-  like (including the CVS version).  Finally, if you change any CMake
-  build system file, then the next type you type 'make' the build
-  system will automatically reconfigure itself without needing any
-  additional bootstrap stage.
+  autoconf. 
 
   \end{enumerate}
 
@@ -475,7 +475,7 @@ functionality
   Testing a serial version of Trilinos is also as easy as 'make
   runtests-serial'.  Running the full serial test suite requires 'make
   runtests-serial TRILINOS\_TEST\_CATEGORY=FRAMEWORK'.  However,
-  running the MPI tests is not so easy and I imagine most users will
+  running the MPI tests is not so easy, and we imagine most users will
   never do this because of having to specify several other tricky
   input 'make' variables like TRILINOS\_MPI\_GO (which requires double
   quotes).  Also, in order to really install and test all of Trilinos
@@ -488,15 +488,15 @@ functionality
   default 'make' command.
 
   {}\item CMake: Users must have a current enough version (currently
-  2.6) of cmake installed on their system to configure and generate
+  2.6) of CMake installed on their system to configure and generate
   makefiles and then build and install.  However, for some specialized
   distributions, it will be possible to distribute Trilinos as RPM
   files, MS Visual Studio project files, and the like where users
   would not need CMake.  However, this will result in less flexibility
   in what packages and options are enabled and disabled.  Note,
-  however, that cmake appears to be as portable and easy to build from
+  however, that CMake appears to be as portable and easy to build from
   source as GNU Make so this is not a huge extra requirement over the
-  autotools system.  Also note that on MS windows, there are binary
+  autotools system.  Also note that on MS Windows, there are binary
   self-extracting installers for a very nice CMake GUI program that
   users can just download, double-click to install, and then run.  On
   MS Windows, if you have the free MS Visual C++ express edition, then
@@ -545,7 +545,7 @@ different packages
 In this section we list some features that are needed for a testing
 system for Trilinos and compare current support for them in the
 autotools-based and CMake-based Trilinos systems.  These features are
-separated out into critical and less critical sets.
+separated into critical and less critical sets.
 
 
 %
@@ -566,7 +566,7 @@ package:
   errors from other related packages.  This is something that SIERRA
   does *not* have worked out yet and it is causing the problems.
 
-  {}\item Perl test harness: Handled very cleaning but there are still
+  {}\item Perl test harness: Handled very cleanly but there are still
   some improvements to be made.  Examples of needed improvements: a)
   listing of all platforms run, b) email notifications of specific
   platform builds.
@@ -626,10 +626,10 @@ package:
 
   \begin{enumerate}
 
-  {}\item Why this is important: a) routine developer testing during
+  {}\item Why this is important: 1) routine developer testing during
   the development process requires the ability to run subsets of tests
-  easily, b) tests for individual packages need to be selected
-  individually, c) different sets of test categories like
+  easily, 2) tests for individual packages need to be selected
+  individually, 3) different sets of test categories like
   ``Performance'' and ``Scalability'' tests must selected as needed.
 
   {}\item Perl test harness: There is only superficial support where
@@ -662,7 +662,7 @@ Perl-based test harness}
   metrics of code quality and of the completeness of tests.
 
   {}\item Perl test harness: Has been supported in the past but not
-  currently?
+  currently
 
   {}\item CMake/CTest: Built-in support and run on many platforms by
   lots of groups.
@@ -681,7 +681,7 @@ Perl-based test harness}
   addresses, out-of-bounds errors, etc.
 
   {}\item Perl test harness: Has been supported in the past but not
-  currently?
+  currently
 
   {}\item CMake/CTest/CDash: Built-in support and is run on many
   platforms by lots of other groups.  This can be run in local build
@@ -710,8 +710,8 @@ Perl-based test harness}
   {}\item Why this is important: Hanging tests can freeze up the test
   harness so that no results are reported at all and it requires a lot
   of manual work to monitor this and to manually kill hanging tests.
-  Every major test harness used by our APP customers have support for
-  this feature (e.g. Alegra, Charon, SIERRA, Xyce).
+  Every major test harness used by the Trilinos application customers
+  have support for this feature (e.g. Alegra, Charon, SIERRA, Xyce).
 
   {}\item Perl test harness: Not currently supported
 
@@ -779,12 +779,12 @@ Perl-based test harness}
   efficient way.
 
   {}\item Perl test harness: No support yet but some experimentation
-  has been done?
+  has been done
 
   {}\item CMake/CTest: Not directly supported but given the
   flexibility of the CMake scripting language, if it is possible to
   support, then this can be supported in the TRILINOS\_ADD\_TEST(...) 
-  function in a way that was largely transparent to the Trilinos
+  function in a way that is largely transparent to the Trilinos
   developer.  For example, the TRILINOS\_ADD\_TEST(...) function could
   add an initial PBS submit script with a call to ADD\_TEST(...) and
   then a back-end could store a list of followup commands that would
@@ -837,7 +837,7 @@ and/or criteria to determine the success or failure of a test
   {}\item Why this is important: Complex tests require that you be
   able to define ``success'' in a variety of different ways.
   Examples: a) Grepping an output file looking for a specific string,
-  b) Checking for a non-zero return value and grepping for a specific
+  b) checking for a non-zero return value and grepping for a specific
   string in stdout, c) running multiple test executables and then
   comparing files to define an overall test that gets reported (This
   could also be used for scalability testing for PBS-type queuing
@@ -849,7 +849,7 @@ and/or criteria to determine the success or failure of a test
   program but that is not enough.
 
   {}\item CMake/CTest: No direct support but you could do this behind
-  the scenes of the TRILINOS\_ADD\_TEST(...)function in a way that
+  the scenes of the TRILINOS\_ADD\_TEST(...) function in a way that
   was 100\% transparent.  For example, the TRILINOS\_ADD\_TEST(...) 
   function or a new similar function could handle multiple COMMAND and
   ARGS fields and on the back end could write a portable python script
@@ -913,7 +913,7 @@ might make it confusing to trace what is happening.
   \end{itemize}
 
 {}\item\textit{Desired:} CTest/CDash: Submit all test data (no matter
-the size) and then pruning test results over time.  This includes
+the size) and then prune test results over time.  This includes
 files that get output as well.  This is being done for the SIERRA +
 Trilinos Integration test repository for instance.
 {}\textit{Workaround}: We can emulate this with our own handling
@@ -923,7 +923,7 @@ scripting code but this will not be available to other CMake projects.
 source files that have line numbers in the corresponding
 CMakeLists.txt file.  Currently, it just lists the entire
 CMakeLists.txt file and nothing else.  {}\textit{Workaround}: Just add
-files slowly and re-run cmake each time to debug the problem.
+files slowly and re-run CMake each time to debug the problem.
 
 {}\item\textit{Desired:} CMake: Strong checking for variables that are
 not defined.  Just letting undefined variables be empty is a bad
@@ -1006,7 +1006,7 @@ and still maintain the current Perl-based test harness.
 
   \end{enumerate}
 
-{}\item What we loose (at least initially):
+{}\item What we lose (at least initially):
 
   \begin{enumerate}
 
@@ -1056,17 +1056,17 @@ harness to CTest/CDash test system}
 
   \end{enumerate}
 
-{}\item What we loose (at least initially):
+{}\item What we lose (at least initially):
 
   \begin{enumerate}
 
   {}\item Separate reporting of test results for different Trilinos
-  packages on the web page and in emails sent out. (however, such
+  packages on the web page and in emails sent out (however, such
   support could be layered on top of CTest and CDash).
 
   {}\item Support for selectively disabling package tests/examples and
-  entire packages when a build fails.  (however, such support could be
-  layered on top of ctest for driving the test harness).
+  entire packages when a build fails (however, such support could be
+  layered on top of CTest for driving the test harness).
 
   \end{enumerate}
 
