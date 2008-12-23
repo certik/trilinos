@@ -33,8 +33,8 @@ Trilinos CMake Evaluation
 % ---------------------------------------------------------------------------- %
 % Set some things we need for SAND reports. These are mandatory
 %
-\SANDnum{SAND2008-xxxx}
-\SANDprintDate{xxx 2008}
+\SANDnum{SAND2008-7593}
+\SANDprintDate{November 2008}
 \SANDauthor{Roscoe A. Bartlett, Daniel M. Dunlavy, Esteban J. Guillen, Tim Shead}
 
 % ---------------------------------------------------------------------------- %
@@ -79,10 +79,12 @@ Trilinos.
 % contributions or helped beyond the normal part of a work assignment.
 % Use \section* since we don't want it in the table of context
 %
-%\clearpage
-%\section*{Acknowledgment}
-%The authors would like to thank ...
-%
+\clearpage
+\section*{Acknowledgment}
+
+The authors would like to thank Kitware and the open-source community
+for creating such a great set of tools.
+
 %The format of this report is based on information found
 %in~\cite{Sand98-0730}.
 %
@@ -92,7 +94,7 @@ Trilinos.
 % Comment out \listoffigures and \listoftables if there are no
 % figures or tables. Make sure this starts on an odd numbered page
 %
-%\clearpage
+\clearpage
 \tableofcontents
 %\listoffigures
 %\listoftables
@@ -1000,7 +1002,8 @@ and still maintain the current Perl-based test harness.
 
 
 %
-\subsection{Gains and losses for switching from autotools to CMake for the build system}
+{}\subsection{Gains and losses for switching from autotools to CMake
+for the build system}
 %
 
 \begin{enumerate}
@@ -1055,8 +1058,8 @@ and still maintain the current Perl-based test harness.
 
 
 %
-\subsection{Gains and losses for switching from current Perl-based test
-harness to CTest/CDash test system}
+{}\subsection{Gains and losses for switching the test harness to the
+current system to CTest/CDash}
 %
 
 \begin{enumerate}
