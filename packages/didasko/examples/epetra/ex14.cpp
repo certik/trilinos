@@ -184,7 +184,7 @@ bool CrsMatrixInfo( const Epetra_CrsMatrix & A,
   int * Indices = new int[MaxNumEntries];
   double Element, AbsElement; // generic nonzero element and its abs value
   int NumEntries;
-  double * Diagonal = new double [NumMyRows];
+  std::vector<double> Diagonal(NumMyRows);
   // SumOffDiagonal is the sum of absolute values for off-diagonals
   double * SumOffDiagonal = new double [NumMyRows];
   for( Row=0 ;  Row<NumMyRows ; ++Row ) {
@@ -249,7 +249,6 @@ bool CrsMatrixInfo( const Epetra_CrsMatrix & A,
 
   delete[] Values;
   delete[] Indices;
-  delete[] Diagonal;
   delete[] SumOffDiagonal;
   delete[] IsDiagonallyDominant;
   delete[] NzPerRow;

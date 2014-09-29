@@ -116,7 +116,7 @@ class TriDiagonalOperator : public Epetra_Operator
     // (an external node is a node required for the matrix-vector
     // product, but owned by another process)
     int Length = count;
-    int * ListOfNodes = new int [Length];
+    std::vector<int> ListOfNodes(Length);
 
     count=0;
     for( int i=0 ; i<NumMyElements_ ; ++i ) {
@@ -124,7 +124,7 @@ class TriDiagonalOperator : public Epetra_Operator
       // no -1 node for the first node of the grid
       if( globalIndex>0 ) {
         if( Map.LID(globalIndex-1) == -1 )
-          if( find( globalIndex-1, ListOfNodes, Length) == -1 ) {
+          if( find( globalIndex-1, ListOfNodes.data(), Length) == -1 ) {
             ListOfNodes[count] = globalIndex-1;
             ++count;
           }
@@ -132,7 +132,7 @@ class TriDiagonalOperator : public Epetra_Operator
       // now +1 node for the last node of the grid
       if( globalIndex<NumGlobalElements_-1 ) {
         if( Map.LID(globalIndex+1) == -1 ) {
-          if( find( globalIndex+1, ListOfNodes, Length) == -1 ) {
+          if( find( globalIndex+1, ListOfNodes.data(), Length) == -1 ) {
             ListOfNodes[count] = globalIndex+1;
             ++count;
           }
@@ -149,12 +149,11 @@ class TriDiagonalOperator : public Epetra_Operator
        */
     // create a Map defined using ListOfNodes
 
-    ImportMap_ = new Epetra_Map(-1,count,ListOfNodes,0,Map_.Comm());
+    ImportMap_ = new Epetra_Map(-1,count,ListOfNodes.data(),0,Map_.Comm());
 
     Importer_ = new  Epetra_Import(*ImportMap_,Map_);
 
     delete[] MyGlobalElements;
-    delete[] ListOfNodes;
 
     return;
 
