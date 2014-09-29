@@ -110,6 +110,10 @@ class TridiagonalCrsMatrix : public Epetra_CrsMatrix {
 
     // Finish up
     FillComplete();
+
+    delete [] MyGlobalElements;
+    delete [] Values;
+    delete [] Indices;
   }
 };
 
