@@ -90,9 +90,7 @@ int main(int argc, char *argv[]) {
   Epetra_SerialComm Comm;
 #endif
 
-  int MyPID = Comm.MyPID();
-  bool verbose = false;
-  if (MyPID==0) verbose = true;
+  //const bool verbose = (Comm.MyPID()==0);
 
   // B E G I N   O F   M A T R I X   C O N S T R U C T I O N
 

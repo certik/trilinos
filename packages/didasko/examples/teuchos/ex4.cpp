@@ -100,8 +100,7 @@ int main(int argc, char* argv[])
   int its;
   its = My_List.get("Max Iters", 1200);
   // Get method that retrieves a parameter of a particular type.
-  float tol;
-  tol = My_List.INVALID_TEMPLATE_QUALIFIER get<float>("Tolerance");
+  float tol = My_List.INVALID_TEMPLATE_QUALIFIER get<float>("Tolerance");
 
   /* In the above example, the first ``get'' method is a safe way of
      obtaining a parameter when its existence is indefinite but required.
