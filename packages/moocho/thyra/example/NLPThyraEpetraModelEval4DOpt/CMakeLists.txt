@@ -1,3 +1,6 @@
+INCLUDE(TribitsAddExecutableAndTest)
+INCLUDE(TribitsAddAdvancedTest)
+INCLUDE(TribitsCopyFilesToBinaryDir)
 
 
 SET(EPETRAEXT_4DOPT_DIR ${PACKAGE_SOURCE_DIR}/../epetraext/example/model_evaluator/4dopt)

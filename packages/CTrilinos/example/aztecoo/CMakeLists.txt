@@ -1,4 +1,6 @@
 
+INCLUDE(TribitsAddExecutableAndTest)
+INCLUDE(AddSubdirectories)
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   simple_epetra_aztecoo

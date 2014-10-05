@@ -1,3 +1,5 @@
+INCLUDE(TribitsPackageMacros)
+INCLUDE(TribitsAddOptionAndDefine)
 
 TRIBITS_PACKAGE(Optika)
 

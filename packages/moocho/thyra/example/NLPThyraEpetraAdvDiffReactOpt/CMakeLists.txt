@@ -1,3 +1,5 @@
+INCLUDE(TribitsAddExecutableAndTest)
+INCLUDE(TribitsCopyFilesToBinaryDir)
 
 
 SET(EPETRAEXT_GLPAPP_DIR ${PACKAGE_SOURCE_DIR}/../epetraext/example/model_evaluator/GLpApp)
