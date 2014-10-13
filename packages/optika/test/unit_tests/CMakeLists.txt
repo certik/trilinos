@@ -1,4 +1,3 @@
-INCLUDE(TribitsAddExecutableAndTest)
 
 include(${QT_USE_FILE})
   
