@@ -66,13 +66,13 @@ public:
   // Move constructor and assignment
   inline UniquePtr(UniquePtr&&) = default;
   UniquePtr<T>& operator=(UniquePtr&&) = default;
-  inline T* operator->() const { return ptr_; }
-  inline T& operator*() const { return *ptr_; }
+//  inline T* operator->() const { return ptr_; }
+//  inline T& operator*() const { return *ptr_; }
 
   /** \brief Get the raw C++ pointer to the underlying object. */
   inline T* get() const;
 
-  inline const Ptr<T> ptr() const;
+//  inline const Ptr<T> ptr() const;
 private:
 #ifdef TEUCHOS_DEBUG
   RCP<T> ptr_;
@@ -94,10 +94,12 @@ UniquePtr<T>::~UniquePtr()
 #endif
 }
 
+/*
 template<class T> inline
 const Ptr<T> UniquePtr<T>::ptr() const {
   return ptr_.ptr();
 }
+*/
 
 template<class T> inline
 T* UniquePtr<T>::get() const
