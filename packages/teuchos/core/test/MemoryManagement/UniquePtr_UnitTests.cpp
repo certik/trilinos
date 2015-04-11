@@ -79,18 +79,18 @@ using Teuchos::RCPNodeTracer;
 
 TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_null )
 {
-  UniquePtr<A> a_rcp;
-  a_rcp = std::move(a_rcp);
-  TEST_ASSERT(is_null(a_rcp));
+  UniquePtr<A> a_uniqueptr;
+  a_uniqueptr = std::move(a_uniqueptr);
+  TEST_ASSERT(is_null(a_uniqueptr));
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_nonnull )
 {
-  UniquePtr<A> a_rcp(new A);
-  A *a_raw_ptr = a_rcp.get();
-  a_rcp = std::move(a_rcp);
-  TEST_ASSERT(nonnull(a_rcp));
-  TEST_EQUALITY(a_rcp.get(), a_raw_ptr);
+  UniquePtr<A> a_uniqueptr(new A);
+  A *a_raw_ptr = a_uniqueptr.get();
+  a_uniqueptr = std::move(a_uniqueptr);
+  TEST_ASSERT(nonnull(a_uniqueptr));
+  TEST_EQUALITY(a_uniqueptr.get(), a_raw_ptr);
 }
 
 #endif // HAVE_TEUCHOSCORE_CXX11
