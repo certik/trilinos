@@ -93,6 +93,13 @@ TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_nonnull )
   TEST_EQUALITY(a_uniqueptr.getRawPtr(), a_raw_ptr);
 }
 
+TEUCHOS_UNIT_TEST( UniquePtr, getConst )
+{
+  UniquePtr<A> a_uniqueptr(new A);
+  Ptr<const A> ca_ptr = a_uniqueptr.getConst();
+  TEST_EQUALITY(a_uniqueptr.getRawPtr(), ca_ptr.getRawPtr());
+}
+
 #endif // HAVE_TEUCHOSCORE_CXX11
 
 

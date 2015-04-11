@@ -76,6 +76,9 @@ public:
   inline T* getRawPtr() const;
 
 //  inline const Ptr<T> ptr() const;
+
+  /** \brief Return a Ptr<const T> version of *this. */
+  inline Ptr<const T> getConst() const;
 private:
 #ifdef TEUCHOS_DEBUG
   RCP<T> ptr_;
@@ -83,6 +86,12 @@ private:
   Ptr<T> ptr_;
 #endif
 };
+
+template<class T2, class T1>
+Ptr<T2> uniqueptr_implicit_cast(const UniquePtr<T1>& p1)
+{
+  return Ptr<T2>(p1.get()); // Will only compile if conversion is legal!
+}
 
 template<class T> inline
 UniquePtr<T>::UniquePtr( ENull /*null_in*/ )
@@ -115,6 +124,16 @@ T* UniquePtr<T>::getRawPtr() const
 {
   return get();
 }
+
+template<class T> inline
+Ptr<const T> UniquePtr<T>::getConst() const
+{
+  return uniqueptr_implicit_cast<const T>(*this);
+}
+
+//------------------------------------------------------
+// Non member functions
+
 
 /** \brief Returns true if <tt>p.get()==NULL</tt>.
  *
