@@ -55,31 +55,31 @@ namespace Teuchos {
 template<class T>
 class UniquePtr {
 public:
-    inline UniquePtr( ENull null_in = null );
-    inline explicit UniquePtr( T *ptr_in ) : ptr_(ptr_in) {
+  inline UniquePtr( ENull null_in = null );
+  inline explicit UniquePtr( T *ptr_in ) : ptr_(ptr_in) {
 //        ASSERT(ptr != nullptr)
-    }
+  }
 #ifndef TEUCHOS_DEBUG
-    ~UniquePtr() { delete ptr_.get(); }
+  ~UniquePtr() { delete ptr_.get(); }
 #endif
-    // Copy constructor and assignment are disabled
-    inline UniquePtr(const UniquePtr<T>& ptr) = delete;
-    UniquePtr<T>& operator=(const UniquePtr<T>& ptr) = delete;
-    // Move constructor and assignment
-    inline UniquePtr(UniquePtr&&) = default;
-    UniquePtr<T>& operator=(UniquePtr&&) = default;
-    inline T* operator->() const { return ptr_; }
-    inline T& operator*() const { return *ptr_; }
+  // Copy constructor and assignment are disabled
+  inline UniquePtr(const UniquePtr<T>& ptr) = delete;
+  UniquePtr<T>& operator=(const UniquePtr<T>& ptr) = delete;
+  // Move constructor and assignment
+  inline UniquePtr(UniquePtr&&) = default;
+  UniquePtr<T>& operator=(UniquePtr&&) = default;
+  inline T* operator->() const { return ptr_; }
+  inline T& operator*() const { return *ptr_; }
 
-    /** \brief Get the raw C++ pointer to the underlying object. */
-    inline T* get() const;
+  /** \brief Get the raw C++ pointer to the underlying object. */
+  inline T* get() const;
 
-    inline const Ptr<T> ptr() const;
+  inline const Ptr<T> ptr() const;
 private:
 #ifdef TEUCHOS_DEBUG
-    RCP<T> ptr_;
+  RCP<T> ptr_;
 #else
-    Ptr<T> ptr_;
+  Ptr<T> ptr_;
 #endif
 };
 
@@ -90,13 +90,13 @@ UniquePtr<T>::UniquePtr( ENull /*null_in*/ )
 
 template<class T> inline
 const Ptr<T> UniquePtr<T>::ptr() const {
-    return ptr_.ptr();
+  return ptr_.ptr();
 }
 
 template<class T> inline
 T* UniquePtr<T>::get() const
 {
-    return ptr_.get();
+  return ptr_.get();
 }
 
 /** \brief Returns true if <tt>p.get()==NULL</tt>.
@@ -106,7 +106,7 @@ T* UniquePtr<T>::get() const
 template<class T> inline
 bool is_null( const UniquePtr<T> &p )
 {
-    return p.get() == 0;
+  return p.get() == 0;
 }
 
 /** \brief Returns true if <tt>p.get()!=NULL</tt>
