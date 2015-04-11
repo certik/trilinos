@@ -56,6 +56,7 @@ using Teuchos::as;
 using Teuchos::null;
 using Teuchos::Ptr;
 using Teuchos::UniquePtr;
+using Teuchos::uniqueptr;
 using Teuchos::RCP;
 using Teuchos::rcp;
 using Teuchos::rcpFromRef;
@@ -79,31 +80,45 @@ using Teuchos::RCPNodeTracer;
 
 TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_null )
 {
-  UniquePtr<A> a_uniqueptr;
-  a_uniqueptr = std::move(a_uniqueptr);
-  TEST_ASSERT(is_null(a_uniqueptr));
+  UniquePtr<A> a_uptr;
+  a_uptr = std::move(a_uptr);
+  TEST_ASSERT(is_null(a_uptr));
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_nonnull )
 {
-  UniquePtr<A> a_uniqueptr(new A);
-  A *a_raw_ptr = a_uniqueptr.getRawPtr();
-  a_uniqueptr = std::move(a_uniqueptr);
-  TEST_ASSERT(nonnull(a_uniqueptr));
-  TEST_EQUALITY(a_uniqueptr.getRawPtr(), a_raw_ptr);
+  UniquePtr<A> a_uptr(new A);
+  A *a_raw_ptr = a_uptr.getRawPtr();
+  a_uptr = std::move(a_uptr);
+  TEST_ASSERT(nonnull(a_uptr));
+  TEST_EQUALITY(a_uptr.getRawPtr(), a_raw_ptr);
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, getConst )
 {
-  UniquePtr<A> a_uniqueptr(new A);
-  Ptr<const A> ca_ptr = a_uniqueptr.getConst();
-  TEST_EQUALITY(a_uniqueptr.getRawPtr(), ca_ptr.getRawPtr());
+  UniquePtr<A> a_uptr(new A);
+  Ptr<const A> ca_ptr = a_uptr.getConst();
+  TEST_EQUALITY(a_uptr.getRawPtr(), ca_ptr.getRawPtr());
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, explicit_null )
 {
   UniquePtr<A> a_uptr(0);
   TEST_ASSERT(is_null(a_uptr));
+}
+
+TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr1 )
+{
+  ECHO(UniquePtr<A> a_uptr = uniqueptr(new A));
+  ECHO(Ptr<A> a_ptr = a_uptr.ptr());
+  ECHO(A *badPtr = a_uptr.getRawPtr());
+  ECHO(a_uptr = null);
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( *a_ptr, DanglingReferenceError );
+  (void)badPtr;
+#else
+  TEST_EQUALITY( a_ptr.getRawPtr(), badPtr );
+#endif
 }
 
 #endif // HAVE_TEUCHOSCORE_CXX11

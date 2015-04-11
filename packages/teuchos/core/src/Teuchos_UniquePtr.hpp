@@ -75,7 +75,8 @@ public:
   /** \brief Get the raw C++ pointer to the underlying object. */
   inline T* getRawPtr() const;
 
-//  inline const Ptr<T> ptr() const;
+  /** \brief Return a Ptr<T> version of *this. */
+  inline const Ptr<T> ptr() const;
 
   /** \brief Return a Ptr<const T> version of *this. */
   inline Ptr<const T> getConst() const;
@@ -87,11 +88,25 @@ private:
 #endif
 };
 
+// -------------------------
+// Non member functions
+
+template<class T>
+inline
+UniquePtr<T>
+uniqueptr(T* p)
+{
+  return UniquePtr<T>(p);
+}
+
 template<class T2, class T1>
 Ptr<T2> uniqueptr_implicit_cast(const UniquePtr<T1>& p1)
 {
   return Ptr<T2>(p1.get()); // Will only compile if conversion is legal!
 }
+
+// --------------------------------
+// Implementation of UniquePtr
 
 template<class T> inline
 UniquePtr<T>::UniquePtr( ENull /*null_in*/ )
@@ -106,12 +121,10 @@ UniquePtr<T>::~UniquePtr()
 #endif
 }
 
-/*
 template<class T> inline
 const Ptr<T> UniquePtr<T>::ptr() const {
   return ptr_.ptr();
 }
-*/
 
 template<class T> inline
 T* UniquePtr<T>::get() const
