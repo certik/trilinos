@@ -60,7 +60,7 @@ public:
 //        ASSERT(ptr != nullptr)
     }
 #ifndef TEUCHOS_DEBUG
-    ~UniquePtr() { delete ptr_; }
+    ~UniquePtr() { delete ptr_.get(); }
 #endif
     // Copy constructor and assignment are disabled
     inline UniquePtr(const UniquePtr<T>& ptr) = delete;
@@ -79,7 +79,7 @@ private:
 #ifdef TEUCHOS_DEBUG
     RCP<T> ptr_;
 #else
-    T *ptr_;
+    Ptr<T> ptr_;
 #endif
 };
 
@@ -90,21 +90,13 @@ UniquePtr<T>::UniquePtr( ENull /*null_in*/ )
 
 template<class T> inline
 const Ptr<T> UniquePtr<T>::ptr() const {
-#ifdef TEUCHOS_DEBUG
     return ptr_.ptr();
-#else
-    return Ptr<T>(ptr_);
-#endif
 }
 
 template<class T> inline
 T* UniquePtr<T>::get() const
 {
-#ifdef TEUCHOS_DEBUG
     return ptr_.get();
-#else
-    return ptr_;
-#endif
 }
 
 /** \brief Returns true if <tt>p.get()==NULL</tt>.
