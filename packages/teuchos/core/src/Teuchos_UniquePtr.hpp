@@ -55,7 +55,8 @@ namespace Teuchos {
 template<class T>
 class UniquePtr {
 public:
-    inline explicit UniquePtr( T *ptr ) : ptr_(ptr) {
+    inline UniquePtr( ENull null_in = null );
+    inline explicit UniquePtr( T *ptr_in ) : ptr_(ptr_in) {
 //        ASSERT(ptr != nullptr)
     }
 #ifndef TEUCHOS_DEBUG
@@ -65,17 +66,15 @@ public:
     inline UniquePtr(const UniquePtr<T>& ptr) = delete;
     UniquePtr<T>& operator=(const UniquePtr<T>& ptr) = delete;
     // Move constructor and assignment
-    inline UniquePtr(UniquePtr&&) = delete;
-    UniquePtr<T>& operator=(UniquePtr&&) = delete;
+    inline UniquePtr(UniquePtr&&) = default;
+    UniquePtr<T>& operator=(UniquePtr&&) = default;
     inline T* operator->() const { return ptr_; }
     inline T& operator*() const { return *ptr_; }
-    inline const Ptr<T> ptr() const {
-#ifdef TEUCHOS_DEBUG
-        return ptr_.ptr();
-#else
-        return Ptr<T>(ptr_);
-#endif
-    }
+
+    /** \brief Get the raw C++ pointer to the underlying object. */
+    inline T* get() const;
+
+    inline const Ptr<T> ptr() const;
 private:
 #ifdef TEUCHOS_DEBUG
     RCP<T> ptr_;
@@ -84,8 +83,41 @@ private:
 #endif
 };
 
+template<class T> inline
+UniquePtr<T>::UniquePtr( ENull /*null_in*/ )
+  : ptr_(0)
+{}
 
+template<class T> inline
+const Ptr<T> UniquePtr<T>::ptr() const {
+#ifdef TEUCHOS_DEBUG
+    return ptr_.ptr();
+#else
+    return Ptr<T>(ptr_);
 #endif
+}
+
+template<class T> inline
+T* UniquePtr<T>::get() const
+{
+#ifdef TEUCHOS_DEBUG
+    return ptr_.get();
+#else
+    return ptr_;
+#endif
+}
+
+/** \brief Returns true if <tt>p.get()==NULL</tt>.
+ *
+ * \relates UniquePtr
+ */
+template<class T> inline
+bool is_null( const UniquePtr<T> &p )
+{
+    return p.get() == 0;
+}
+
+#endif // HAVE_TEUCHOSCORE_CXX11
 
 
 } // namespace Teuchos

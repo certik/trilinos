@@ -44,6 +44,7 @@
 #include "TeuchosCore_ConfigDefs.hpp"
 #include "Teuchos_UnitTestHarness.hpp"
 #include "Teuchos_Ptr.hpp"
+#include "Teuchos_UniquePtr.hpp"
 #include "Teuchos_getConst.hpp"
 #include "TestClasses.hpp"
 
@@ -54,6 +55,7 @@ namespace {
 using Teuchos::as;
 using Teuchos::null;
 using Teuchos::Ptr;
+using Teuchos::UniquePtr;
 using Teuchos::RCP;
 using Teuchos::rcp;
 using Teuchos::rcpFromRef;
@@ -78,7 +80,7 @@ using Teuchos::RCPNodeTracer;
 TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_null )
 {
   UniquePtr<A> a_rcp;
-  a_rcp = a_rcp;
+  a_rcp = std::move(a_rcp);
   TEST_ASSERT(is_null(a_rcp));
 }
 
