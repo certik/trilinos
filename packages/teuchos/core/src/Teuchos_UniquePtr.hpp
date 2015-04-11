@@ -117,6 +117,16 @@ bool is_null( const UniquePtr<T> &p )
     return p.get() == 0;
 }
 
+/** \brief Returns true if <tt>p.get()!=NULL</tt>
+ *
+ * \relates UniquePtr
+ */
+template<class T> inline
+bool nonnull( const UniquePtr<T> &p )
+{
+  return p.get() != 0;
+}
+
 #endif // HAVE_TEUCHOSCORE_CXX11
 
 
