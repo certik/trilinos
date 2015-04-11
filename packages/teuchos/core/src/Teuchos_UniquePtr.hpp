@@ -59,9 +59,7 @@ public:
   inline explicit UniquePtr( T *ptr_in ) : ptr_(ptr_in) {
 //        ASSERT(ptr != nullptr)
   }
-#ifndef TEUCHOS_DEBUG
-  ~UniquePtr() { delete ptr_.get(); }
-#endif
+  ~UniquePtr();
   // Copy constructor and assignment are disabled
   inline UniquePtr(const UniquePtr<T>& ptr) = delete;
   UniquePtr<T>& operator=(const UniquePtr<T>& ptr) = delete;
@@ -87,6 +85,14 @@ template<class T> inline
 UniquePtr<T>::UniquePtr( ENull /*null_in*/ )
   : ptr_(0)
 {}
+
+template<class T>
+UniquePtr<T>::~UniquePtr()
+{
+#ifndef TEUCHOS_DEBUG
+  delete ptr_.get();
+#endif
+}
 
 template<class T> inline
 const Ptr<T> UniquePtr<T>::ptr() const {
