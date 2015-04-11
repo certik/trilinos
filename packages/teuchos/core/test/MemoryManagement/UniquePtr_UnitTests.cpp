@@ -87,10 +87,10 @@ TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_null )
 TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_nonnull )
 {
   UniquePtr<A> a_uniqueptr(new A);
-  A *a_raw_ptr = a_uniqueptr.get();
+  A *a_raw_ptr = a_uniqueptr.getRawPtr();
   a_uniqueptr = std::move(a_uniqueptr);
   TEST_ASSERT(nonnull(a_uniqueptr));
-  TEST_EQUALITY(a_uniqueptr.get(), a_raw_ptr);
+  TEST_EQUALITY(a_uniqueptr.getRawPtr(), a_raw_ptr);
 }
 
 #endif // HAVE_TEUCHOSCORE_CXX11

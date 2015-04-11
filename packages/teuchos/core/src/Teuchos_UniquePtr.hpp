@@ -72,6 +72,9 @@ public:
   /** \brief Get the raw C++ pointer to the underlying object. */
   inline T* get() const;
 
+  /** \brief Get the raw C++ pointer to the underlying object. */
+  inline T* getRawPtr() const;
+
 //  inline const Ptr<T> ptr() const;
 private:
 #ifdef TEUCHOS_DEBUG
@@ -105,6 +108,12 @@ template<class T> inline
 T* UniquePtr<T>::get() const
 {
   return ptr_.get();
+}
+
+template<class T> inline
+T* UniquePtr<T>::getRawPtr() const
+{
+  return get();
 }
 
 /** \brief Returns true if <tt>p.get()==NULL</tt>.
