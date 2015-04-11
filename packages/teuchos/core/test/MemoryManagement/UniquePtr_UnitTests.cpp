@@ -139,6 +139,26 @@ TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr2 )
 #endif
 }
 
+TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr3 )
+{
+  ECHO(Ptr<A> a_ptr);
+  ECHO(A *badPtr = 0);
+  {
+    ECHO(UniquePtr<A> a_uptr = uniqueptr(new A));
+    ECHO(badPtr = a_uptr.getRawPtr());
+    ECHO(Ptr<A> a_ptr2(a_uptr.ptr()));
+    ECHO(Ptr<A> a_ptr3(a_ptr2));
+    ECHO(a_ptr = a_ptr3);
+    TEST_EQUALITY( a_ptr.getRawPtr(), badPtr );
+  }
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( *a_ptr, DanglingReferenceError );
+  (void)badPtr;
+#else
+  TEST_EQUALITY( a_ptr.getRawPtr(), badPtr );
+#endif
+}
+
 #endif // HAVE_TEUCHOSCORE_CXX11
 
 
