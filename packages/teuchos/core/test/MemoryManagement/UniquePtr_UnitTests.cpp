@@ -111,18 +111,22 @@ TEUCHOS_UNIT_TEST( UniquePtr, assign2 )
   UniquePtr<A> b_uptr;
   TEST_ASSERT(nonnull(a_uptr));
   TEST_ASSERT(is_null(b_uptr));
+  TEST_ASSERT( a_uptr->A_f() == A_f_return );
   b_uptr = std::move(a_uptr);
   TEST_ASSERT(nonnull(b_uptr));
   TEST_ASSERT(is_null(a_uptr));
+  TEST_ASSERT( b_uptr->A_f() == A_f_return );
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, assign3 )
 {
   UniquePtr<A> a_uptr(new A);
   TEST_ASSERT(nonnull(a_uptr));
+  TEST_ASSERT( a_uptr->A_f() == A_f_return );
   UniquePtr<A> b_uptr = std::move(a_uptr);
   TEST_ASSERT(nonnull(b_uptr));
   TEST_ASSERT(is_null(a_uptr));
+  TEST_ASSERT( b_uptr->A_f() == A_f_return );
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, getConst )
