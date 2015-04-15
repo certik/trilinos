@@ -150,7 +150,12 @@ Ptr<const T> UniquePtr<T>::getConst() const
 template<class T> inline
 void UniquePtr<T>::reset()
 {
+#ifdef TEUCHOS_DEBUG
   ptr_.reset();
+#else
+  delete ptr_.get();
+  ptr_ = null;
+#endif
 }
 
 //------------------------------------------------------
