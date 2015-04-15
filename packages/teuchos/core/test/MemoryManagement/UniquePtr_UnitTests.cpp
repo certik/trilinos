@@ -126,6 +126,13 @@ TEUCHOS_UNIT_TEST( UniquePtr, reset_null2 )
   TEST_ASSERT(is_null(af_uptr));
 }
 
+TEUCHOS_UNIT_TEST( UniquePtr, dereference )
+{
+  UniquePtr<A> a_uptr = uniqueptr(new A);
+  TEST_ASSERT( (*a_uptr).A_f() == A_f_return );
+  TEST_ASSERT( a_uptr->A_f() == A_f_return );
+}
+
 TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr1 )
 {
   ECHO(UniquePtr<A> a_uptr = uniqueptr(new A));
