@@ -56,9 +56,7 @@ template<class T>
 class UniquePtr {
 public:
   inline UniquePtr( ENull null_in = null );
-  inline explicit UniquePtr( T *ptr_in ) : ptr_(ptr_in) {
-//        ASSERT(ptr != nullptr)
-  }
+  inline explicit UniquePtr( T *ptr_in ) : ptr_(ptr_in) { }
   ~UniquePtr();
   // Copy constructor and assignment are disabled
   inline UniquePtr(const UniquePtr<T>& ptr) = delete;
