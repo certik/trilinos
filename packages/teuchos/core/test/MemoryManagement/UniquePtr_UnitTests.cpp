@@ -111,11 +111,11 @@ TEUCHOS_UNIT_TEST( UniquePtr, assign2 )
   UniquePtr<A> b_uptr;
   TEST_ASSERT(nonnull(a_uptr));
   TEST_ASSERT(is_null(b_uptr));
-  TEST_ASSERT( a_uptr->A_f() == A_f_return );
+  TEST_EQUALITY( a_uptr->A_f(), A_f_return );
   b_uptr = std::move(a_uptr);
   TEST_ASSERT(nonnull(b_uptr));
   TEST_ASSERT(is_null(a_uptr));
-  TEST_ASSERT( b_uptr->A_f() == A_f_return );
+  TEST_EQUALITY( b_uptr->A_f(), A_f_return );
 #ifdef TEUCHOS_DEBUG
   TEST_THROW( *a_uptr, DanglingReferenceError );
   TEST_THROW( a_uptr->A_f(), DanglingReferenceError );
@@ -126,11 +126,11 @@ TEUCHOS_UNIT_TEST( UniquePtr, assign3 )
 {
   UniquePtr<A> a_uptr(new A);
   TEST_ASSERT(nonnull(a_uptr));
-  TEST_ASSERT( a_uptr->A_f() == A_f_return );
+  TEST_EQUALITY( a_uptr->A_f(), A_f_return );
   UniquePtr<A> b_uptr = std::move(a_uptr);
   TEST_ASSERT(nonnull(b_uptr));
   TEST_ASSERT(is_null(a_uptr));
-  TEST_ASSERT( b_uptr->A_f() == A_f_return );
+  TEST_EQUALITY( b_uptr->A_f(), A_f_return );
 #ifdef TEUCHOS_DEBUG
   TEST_THROW( *a_uptr, DanglingReferenceError );
   TEST_THROW( a_uptr->A_f(), DanglingReferenceError );
@@ -147,7 +147,7 @@ TEUCHOS_UNIT_TEST( UniquePtr, assign4 )
 #ifdef TEUCHOS_DEBUG
   TEST_THROW( t = (*orig == 5), DanglingReferenceError );
 #endif
-  TEST_ASSERT(*stolen == 5);
+  TEST_EQUALITY(*stolen, 5);
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, getConst )
@@ -176,9 +176,9 @@ TEUCHOS_UNIT_TEST( UniquePtr, reset_null2 )
   int a_f_return = -1;
   UniquePtr<Get_A_f_return> af_uptr = uniqueptr(new Get_A_f_return(a_uptr.get(),
         &a_f_return));
-  TEST_ASSERT( a_f_return != A_f_return );
+  TEST_INEQUALITY( a_f_return, A_f_return );
   af_uptr.reset();
-  TEST_ASSERT( a_f_return == A_f_return );
+  TEST_EQUALITY( a_f_return, A_f_return );
   TEST_ASSERT(is_null(af_uptr));
 }
 
@@ -189,16 +189,16 @@ TEUCHOS_UNIT_TEST( UniquePtr, deallocate )
   {
     UniquePtr<Get_A_f_return> af_uptr = uniqueptr(
         new Get_A_f_return(a_uptr.get(), &a_f_return));
-    TEST_ASSERT( a_f_return != A_f_return );
+    TEST_INEQUALITY( a_f_return, A_f_return );
   }
-  TEST_ASSERT( a_f_return == A_f_return );
+  TEST_EQUALITY( a_f_return, A_f_return );
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, dereference )
 {
   UniquePtr<A> a_uptr = uniqueptr(new A);
-  TEST_ASSERT( (*a_uptr).A_f() == A_f_return );
-  TEST_ASSERT( a_uptr->A_f() == A_f_return );
+  TEST_EQUALITY( (*a_uptr).A_f(), A_f_return );
+  TEST_EQUALITY( a_uptr->A_f(), A_f_return );
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr1 )
