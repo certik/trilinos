@@ -125,7 +125,7 @@ template<class T>
 UniquePtr<T>::~UniquePtr()
 {
 #ifndef TEUCHOS_DEBUG
-  delete ptr_.get();
+  delete ptr_.get(); // Note: the pointer can be null
 #endif
 }
 
@@ -158,7 +158,7 @@ void UniquePtr<T>::reset()
 #ifdef TEUCHOS_DEBUG
   ptr_.reset();
 #else
-  delete ptr_.get();
+  delete ptr_.get(); // Note: the pointer can be null
   ptr_ = null;
 #endif
 }
