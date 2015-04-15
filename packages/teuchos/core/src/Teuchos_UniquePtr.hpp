@@ -71,8 +71,8 @@ public:
     std::swap(ptr_, r_ptr.ptr_);
     return *this;
   }
-  inline T* operator->() const { return ptr_.get(); }
-  inline T& operator*() const { return *ptr_; }
+  inline T* operator->() const { return ptr_.operator->(); }
+  inline T& operator*() const { return ptr_.operator*(); }
 
   /** \brief Get the raw C++ pointer to the underlying object. */
   inline T* get() const;

@@ -116,6 +116,10 @@ TEUCHOS_UNIT_TEST( UniquePtr, assign2 )
   TEST_ASSERT(nonnull(b_uptr));
   TEST_ASSERT(is_null(a_uptr));
   TEST_ASSERT( b_uptr->A_f() == A_f_return );
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( *a_uptr, DanglingReferenceError );
+  TEST_THROW( a_uptr->A_f(), DanglingReferenceError );
+#endif
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, assign3 )
