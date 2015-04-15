@@ -137,6 +137,19 @@ TEUCHOS_UNIT_TEST( UniquePtr, assign3 )
 #endif
 }
 
+TEUCHOS_UNIT_TEST( UniquePtr, assign4 )
+{
+  UniquePtr<int> orig(new int(5));
+  bool t;
+  t = (*orig == 5);
+  TEST_ASSERT(t)
+  auto stolen = std::move(orig);
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( t = (*orig == 5), DanglingReferenceError );
+#endif
+  TEST_ASSERT(*stolen == 5);
+}
+
 TEUCHOS_UNIT_TEST( UniquePtr, getConst )
 {
   UniquePtr<A> a_uptr(new A);
