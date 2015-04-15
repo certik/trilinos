@@ -64,8 +64,13 @@ public:
   inline UniquePtr(const UniquePtr<T>& ptr) = delete;
   UniquePtr<T>& operator=(const UniquePtr<T>& ptr) = delete;
   // Move constructor and assignment
-  inline UniquePtr(UniquePtr&&) = default;
-  UniquePtr<T>& operator=(UniquePtr&&) = default;
+  inline UniquePtr(UniquePtr &&r_ptr) : ptr_(r_ptr.ptr_) {
+    r_ptr.ptr_ = null;
+  }
+  UniquePtr<T>& operator=(UniquePtr &&r_ptr) {
+    std::swap(ptr_, r_ptr.ptr_);
+    return *this;
+  }
   inline T* operator->() const { return ptr_.get(); }
   inline T& operator*() const { return *ptr_; }
 

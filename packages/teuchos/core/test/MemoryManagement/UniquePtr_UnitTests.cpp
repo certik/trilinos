@@ -94,6 +94,37 @@ TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_nonnull )
   TEST_EQUALITY(a_uptr.getRawPtr(), a_raw_ptr);
 }
 
+TEUCHOS_UNIT_TEST( UniquePtr, assign1 )
+{
+  UniquePtr<A> a_uptr;
+  UniquePtr<A> b_uptr;
+  TEST_ASSERT(is_null(a_uptr));
+  TEST_ASSERT(is_null(b_uptr));
+  b_uptr = std::move(a_uptr);
+  TEST_ASSERT(is_null(a_uptr));
+  TEST_ASSERT(is_null(b_uptr));
+}
+
+TEUCHOS_UNIT_TEST( UniquePtr, assign2 )
+{
+  UniquePtr<A> a_uptr(new A);
+  UniquePtr<A> b_uptr;
+  TEST_ASSERT(nonnull(a_uptr));
+  TEST_ASSERT(is_null(b_uptr));
+  b_uptr = std::move(a_uptr);
+  TEST_ASSERT(nonnull(b_uptr));
+  TEST_ASSERT(is_null(a_uptr));
+}
+
+TEUCHOS_UNIT_TEST( UniquePtr, assign3 )
+{
+  UniquePtr<A> a_uptr(new A);
+  TEST_ASSERT(nonnull(a_uptr));
+  UniquePtr<A> b_uptr = std::move(a_uptr);
+  TEST_ASSERT(nonnull(b_uptr));
+  TEST_ASSERT(is_null(a_uptr));
+}
+
 TEUCHOS_UNIT_TEST( UniquePtr, getConst )
 {
   UniquePtr<A> a_uptr(new A);
