@@ -107,6 +107,13 @@ TEUCHOS_UNIT_TEST( UniquePtr, explicit_null )
   TEST_ASSERT(is_null(a_uptr));
 }
 
+TEUCHOS_UNIT_TEST( UniquePtr, reset_null )
+{
+  UniquePtr<A> a_uptr = uniqueptr(new A);
+  a_uptr.reset();
+  TEST_ASSERT(is_null(a_uptr));
+}
+
 TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr1 )
 {
   ECHO(UniquePtr<A> a_uptr = uniqueptr(new A));

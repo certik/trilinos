@@ -80,6 +80,9 @@ public:
 
   /** \brief Return a Ptr<const T> version of *this. */
   inline Ptr<const T> getConst() const;
+
+  /** \brief Reset to null. */
+  inline void reset();
 private:
 #ifdef TEUCHOS_DEBUG
   RCP<T> ptr_;
@@ -142,6 +145,12 @@ template<class T> inline
 Ptr<const T> UniquePtr<T>::getConst() const
 {
   return uniqueptr_implicit_cast<const T>(*this);
+}
+
+template<class T> inline
+void UniquePtr<T>::reset()
+{
+  ptr_.reset();
 }
 
 //------------------------------------------------------
