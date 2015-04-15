@@ -126,6 +126,18 @@ TEUCHOS_UNIT_TEST( UniquePtr, reset_null2 )
   TEST_ASSERT(is_null(af_uptr));
 }
 
+TEUCHOS_UNIT_TEST( UniquePtr, deallocate )
+{
+  UniquePtr<A> a_uptr = uniqueptr(new A);
+  int a_f_return = -1;
+  {
+    UniquePtr<Get_A_f_return> af_uptr = uniqueptr(
+        new Get_A_f_return(a_uptr.get(), &a_f_return));
+    TEST_ASSERT( a_f_return != A_f_return );
+  }
+  TEST_ASSERT( a_f_return == A_f_return );
+}
+
 TEUCHOS_UNIT_TEST( UniquePtr, dereference )
 {
   UniquePtr<A> a_uptr = uniqueptr(new A);
