@@ -286,6 +286,12 @@ TEUCHOS_UNIT_TEST( UniquePtr, std_unique_ptr_interface )
 {
   test_unique_ptr_interface<std::unique_ptr>();
   test_unique_ptr_interface<UniquePtr>();
+  A *a;
+  std::tuple<A*, std::default_delete<A>> t;
+  std::cout << "SIZE: " << sizeof(std::default_delete<A>) << std::endl;
+  std::cout << "SIZE: " << sizeof(std::unique_ptr<A>) << std::endl;
+  std::cout << "SIZE: " << sizeof(a) << std::endl;
+  std::cout << "SIZE: " << sizeof(t) << std::endl;
 }
 
 #endif // HAVE_TEUCHOSCORE_CXX11
