@@ -99,14 +99,14 @@ private:
 
 template<class T, class Deleter=std::default_delete<T>>
 inline
-UniquePtr<T>
+UniquePtr<T, Deleter>
 uniqueptr(T* p)
 {
   return UniquePtr<T>(p);
 }
 
 template<class T2, class T1, class Deleter=std::default_delete<T1>>
-Ptr<T2> uniqueptr_implicit_cast(const UniquePtr<T1>& p1)
+Ptr<T2> uniqueptr_implicit_cast(const UniquePtr<T1, Deleter>& p1)
 {
   return Ptr<T2>(p1.get()); // Will only compile if conversion is legal!
 }
@@ -114,49 +114,49 @@ Ptr<T2> uniqueptr_implicit_cast(const UniquePtr<T1>& p1)
 // --------------------------------
 // Implementation of UniquePtr
 
-template<class T, class Deleter=std::default_delete<T>>
+template<class T, class Deleter>
 UniquePtr<T, Deleter>::UniquePtr( ENull /*null_in*/ )
   : ptr_(0)
 {}
 
-template<class T, class Deleter=std::default_delete<T>>
-UniquePtr<T>::~UniquePtr()
+template<class T, class Deleter>
+UniquePtr<T, Deleter>::~UniquePtr()
 {
 #ifndef TEUCHOS_DEBUG
   delete ptr_.get(); // Note: the pointer can be null
 #endif
 }
 
-template<class T, class Deleter=std::default_delete<T>>
+template<class T, class Deleter>
 inline
-const Ptr<T> UniquePtr<T>::ptr() const {
+const Ptr<T> UniquePtr<T, Deleter>::ptr() const {
   return ptr_.ptr();
 }
 
-template<class T, class Deleter=std::default_delete<T>>
+template<class T, class Deleter>
 inline
-T* UniquePtr<T>::get() const
+T* UniquePtr<T, Deleter>::get() const
 {
   return ptr_.get();
 }
 
-template<class T, class Deleter=std::default_delete<T>>
+template<class T, class Deleter>
 inline
-T* UniquePtr<T>::getRawPtr() const
+T* UniquePtr<T, Deleter>::getRawPtr() const
 {
   return get();
 }
 
-template<class T, class Deleter=std::default_delete<T>>
+template<class T, class Deleter>
 inline
-Ptr<const T> UniquePtr<T>::getConst() const
+Ptr<const T> UniquePtr<T, Deleter>::getConst() const
 {
   return uniqueptr_implicit_cast<const T>(*this);
 }
 
-template<class T, class Deleter=std::default_delete<T>>
+template<class T, class Deleter>
 inline
-void UniquePtr<T>::reset()
+void UniquePtr<T, Deleter>::reset()
 {
 #ifdef TEUCHOS_DEBUG
   ptr_.reset();
@@ -176,7 +176,7 @@ void UniquePtr<T>::reset()
  */
 template<class T, class Deleter=std::default_delete<T>>
 inline
-bool is_null( const UniquePtr<T> &p )
+bool is_null( const UniquePtr<T, Deleter> &p )
 {
   return p.get() == 0;
 }
@@ -187,7 +187,7 @@ bool is_null( const UniquePtr<T> &p )
  */
 template<class T, class Deleter=std::default_delete<T>>
 inline
-bool nonnull( const UniquePtr<T> &p )
+bool nonnull( const UniquePtr<T, Deleter> &p )
 {
   return p.get() != 0;
 }
