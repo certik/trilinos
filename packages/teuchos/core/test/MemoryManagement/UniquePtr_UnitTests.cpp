@@ -285,6 +285,7 @@ void test_unique_ptr_interface()
 TEUCHOS_UNIT_TEST( UniquePtr, std_unique_ptr_interface )
 {
   test_unique_ptr_interface<std::unique_ptr>();
+  test_unique_ptr_interface<UniquePtr>();
 }
 
 #endif // HAVE_TEUCHOSCORE_CXX11
