@@ -275,11 +275,19 @@ TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr4 )
 template <template <typename T, typename Deleter=std::default_delete<T>> class UPtr>
 bool test_unique_ptr_interface()
 {
+  // Test 1
   UPtr<A> p1(new A);
   {
     UPtr<A> p2(std::move(p1));
     p1 = std::move(p2);
   }
+
+  // Test 2
+  int x = 5;
+  auto del = [](int * p) { std::cout << "Deleting x, value is : " << *p; };
+  UPtr<int, decltype(del)> px(&x, del);
+
+  // Success
   return true;
 }
 

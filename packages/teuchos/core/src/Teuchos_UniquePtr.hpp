@@ -57,6 +57,12 @@ class UniquePtr {
 public:
   inline UniquePtr( ENull null_in = null );
   inline explicit UniquePtr( T *ptr_in ) : ptr_(ptr_in) { }
+  inline explicit UniquePtr( T *ptr_in, const Deleter &d)
+      : ptr_(ptr_in
+#ifdef TEUCHOS_DEBUG
+          , deallocFunctorDelete<T, Deleter>(d), true
+#endif
+          ), d_(d) { }
   ~UniquePtr();
   // Copy constructor and assignment are disabled
   inline UniquePtr(const UniquePtr<T>& ptr) = delete;
@@ -92,6 +98,7 @@ private:
 #else
   Ptr<T> ptr_;
 #endif
+  Deleter d_;
 };
 
 // -------------------------
@@ -123,7 +130,7 @@ template<class T, class Deleter>
 UniquePtr<T, Deleter>::~UniquePtr()
 {
 #ifndef TEUCHOS_DEBUG
-  delete ptr_.get(); // Note: the pointer can be null
+  d_(ptr_.get()); // Note: the pointer can be null
 #endif
 }
 
@@ -161,7 +168,7 @@ void UniquePtr<T, Deleter>::reset()
 #ifdef TEUCHOS_DEBUG
   ptr_.reset();
 #else
-  delete ptr_.get(); // Note: the pointer can be null
+  d_(ptr_.get()); // Note: the pointer can be null
   ptr_ = null;
 #endif
 }
