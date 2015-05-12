@@ -71,6 +71,10 @@ public:
   inline UniquePtr(UniquePtr &&r_ptr) : ptr_(r_ptr.ptr_) {
     r_ptr.ptr_ = null;
   }
+  template<class U, class E>
+  inline UniquePtr(UniquePtr<U, E> &&r_ptr) : ptr_(r_ptr.get_ptr_()) {
+    r_ptr.set_ptr_null_();
+  }
   UniquePtr<T>& operator=(UniquePtr &&r_ptr) {
     std::swap(ptr_, r_ptr.ptr_);
     return *this;
@@ -92,6 +96,19 @@ public:
 
   /** \brief Reset to null. */
   inline void reset();
+
+  // FIXME: DO NOT USE THESE
+#ifdef TEUCHOS_DEBUG
+  inline RCP<T> get_ptr_() {
+#else
+  inline Ptr<T> get_ptr_() {
+#endif
+    return ptr_;
+  }
+
+  inline void set_ptr_null_() {
+    ptr_ = null;
+  }
 private:
 #ifdef TEUCHOS_DEBUG
   RCP<T> ptr_;

@@ -359,7 +359,7 @@ bool test_unique_ptr_interface()
     UPtr<Foo, D> up6b(std::move(up6a)); // D is moved
 
     UPtr<Foo, D&> up6c(new Foo, d); // D is a reference
-//    UPtr<Foo, D> up6d(std::move(up6c)); // D is copied
+    UPtr<Foo, D> up6d(std::move(up6c)); // D is copied
   }
 
   // Success
