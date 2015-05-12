@@ -273,19 +273,20 @@ TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr4 )
 }
 
 template <template <typename T, typename Deleter=std::default_delete<T>> class UPtr>
-void test_unique_ptr_interface()
+bool test_unique_ptr_interface()
 {
   UPtr<A> p1(new A);
   {
     UPtr<A> p2(std::move(p1));
     p1 = std::move(p2);
   }
+  return true;
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, std_unique_ptr_interface )
 {
-  test_unique_ptr_interface<std::unique_ptr>();
-  test_unique_ptr_interface<UniquePtr>();
+  TEST_ASSERT(test_unique_ptr_interface<std::unique_ptr>());
+  TEST_ASSERT(test_unique_ptr_interface<UniquePtr>());
   A *a;
   std::tuple<A*, std::default_delete<A>> t;
   int x = 5;
