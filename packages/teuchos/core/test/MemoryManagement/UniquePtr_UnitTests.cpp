@@ -284,8 +284,18 @@ bool test_unique_ptr_interface()
 
   // Test 2
   int x = 5;
-  auto del = [](int * p) { std::cout << "Deleting x, value is : " << *p; };
-  UPtr<int, decltype(del)> px(&x, del);
+  auto del1 = [](int * p) { std::cout << "Deleting x, value is : " << *p << std::endl; };
+  UPtr<int, decltype(del1)> px1(&x, del1);
+
+  // Test 3
+  bool deleted = false;
+  int x2 = 5;
+  auto del2 = [&deleted](int * p) { deleted = true; };
+  {
+    if (deleted) return false;
+    UPtr<int, decltype(del2)> px2(&x2, del2);
+  }
+  if (!deleted) return false;
 
   // Success
   return true;
