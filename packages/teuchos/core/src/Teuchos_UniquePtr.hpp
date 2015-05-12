@@ -97,6 +97,15 @@ public:
   /** \brief Reset to null. */
   inline void reset();
 
+  inline T* release() {
+    T *p = get();
+#ifdef TEUCHOS_DEBUG
+    ptr_.release(); // So that the next line does not delete the object
+#endif
+    ptr_ = null;
+    return p;
+  }
+
   // FIXME: DO NOT USE THESE
 #ifdef TEUCHOS_DEBUG
   inline RCP<T> get_ptr_() {

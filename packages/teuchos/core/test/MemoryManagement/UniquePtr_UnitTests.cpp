@@ -362,6 +362,17 @@ bool test_unique_ptr_interface()
     UPtr<Foo, D> up6d(std::move(up6c)); // D is copied
   }
 
+  // Test 10
+  {
+    UPtr<Foo> up(new Foo());
+    Foo *fp = up.release();
+    if (up.get() != nullptr) {
+      delete fp;
+      return false;
+    }
+    delete fp;
+  }
+
   // Success
   return true;
 }
