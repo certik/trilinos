@@ -272,6 +272,24 @@ TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr4 )
 #endif
 }
 
+struct Foo { // object to manage
+  Foo() { } // Foo ctor  TODO: test that it is called
+  Foo(const Foo&) { throw std::runtime_error("Foo copy ctor called"); }
+  Foo(Foo&&) { throw std::runtime_error("Foo move ctor called"); }
+  ~Foo() { } // ~Foo dtor TODO: test that it is called
+};
+
+struct D { // deleter
+  D() {}; // TODO: test that it is called
+  D(const D&) { } // D copy ctor TODO: test that it is called
+  D(D&) { } // D non-const copy ctor TODO: test that it is called
+  D(D&&) { } // D move ctor TODO: test that it is called
+  void operator()(Foo* p) const {
+    // D is deleting a Foo TODO: test that it is called
+    delete p;
+  };
+};
+
 template <template <typename T, typename Deleter=std::default_delete<T>> class UPtr>
 bool test_unique_ptr_interface()
 {
@@ -283,9 +301,9 @@ bool test_unique_ptr_interface()
   }
 
   // Test 2
-  int x = 5;
-  auto del1 = [](int * p) { std::cout << "Deleting x, value is : " << *p << std::endl; };
-  UPtr<int, decltype(del1)> px1(&x, del1);
+  int x1 = 5;
+  auto del1 = [](int * p) { std::cout << "Deleting x1, value is : " << *p << std::endl; };
+  UPtr<int, decltype(del1)> px1(&x1, del1);
 
   // Test 3
   bool deleted = false;
@@ -296,6 +314,53 @@ bool test_unique_ptr_interface()
     UPtr<int, decltype(del2)> px2(&x2, del2);
   }
   if (!deleted) return false;
+
+  // Test 4
+  UPtr<Foo> up1;
+  if (up1.get() != nullptr) return false;
+  UPtr<Foo> up1b(nullptr);
+  if (up1b.get() != nullptr) return false;
+
+  // Test 5
+  {
+    UPtr<Foo> up2(new Foo);
+    if (up2.get() == nullptr) return false;
+  }
+
+  // Test 6
+  D d;
+  {
+    UPtr<Foo, D> up3(new Foo, d); // deleter copied
+    if (up3.get() == nullptr) return false;
+  }
+  {
+    UPtr<Foo, D&> up3b(new Foo, d); // up3b holds a reference to d
+    if (up3b.get() == nullptr) return false;
+  }
+
+  // Test 7
+  {
+    UPtr<Foo, D> up4(new Foo, D()); // deleter moved
+    if (up4.get() == nullptr) return false;
+  }
+
+  // Test 8
+  {
+    UPtr<Foo> up5a(new Foo);
+    if (up5a.get() == nullptr) return false;
+    UPtr<Foo> up5b(std::move(up5a)); // ownership transfer
+    if (up5a.get() != nullptr) return false;
+    if (up5b.get() == nullptr) return false;
+  }
+
+  // Test 9
+  {
+    UPtr<Foo, D> up6a(new Foo, d); // D is copied
+    UPtr<Foo, D> up6b(std::move(up6a)); // D is moved
+
+    UPtr<Foo, D&> up6c(new Foo, d); // D is a reference
+//    UPtr<Foo, D> up6d(std::move(up6c)); // D is copied
+  }
 
   // Success
   return true;
