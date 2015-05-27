@@ -28,33 +28,33 @@ struct D { // deleter
   void operator()(std::map<int, int> *p) const { };
 };
 
+#ifdef DEBUG_MODE
+#    define DECLARE_P(x) UniquePtr<decltype(x), D> x ## aux_pointer;
+#    define PTRFROMREF(x) x ## aux_pointer.ptr()
+#    define INIT_P(x) x ## aux_pointer(&x, D())
+#else
+#    define DECLARE_P(x)
+#    define PTRFROMREF(x) ptrFromRef(m)
+#    define INIT_P(x)
+#endif
+
 
 class A {
 private:
     std::map<int, int> m;
+    DECLARE_P(m)
 public:
     A()
 #ifdef DEBUG_MODE
-      : mp(&m, D())
+      : INIT_P(m)
 #endif
       { }
     void add(int a, int b) {
         m[a] = b;
     }
     Ptr<std::map<int, int>> get_access() {
-#ifdef DEBUG_MODE
-        return mp.ptr();
-#else
-        return ptrFromRef(m);
-#endif
+        return PTRFROMREF(m);
     }
-
-
-private:
-// Only used in Debug mode
-#ifdef DEBUG_MODE
-    UniquePtr<decltype(m), D> mp;
-#endif
 };
 
 template<class T>
