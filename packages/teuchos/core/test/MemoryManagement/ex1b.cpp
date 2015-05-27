@@ -21,18 +21,19 @@ using Teuchos::ptrFromRef;
 
 #define DEBUG_MODE
 
+template<class T>
 struct D { // deleter
   D() {};
   D(const D&) { }
   D(D&) { }
   D(D&&) { }
-  void operator()(std::map<int, int> *p) const { };
+  void operator()(T *p) const { };
 };
 
 #ifdef DEBUG_MODE
-#    define DECLARE_P(x) UniquePtr<decltype(x), D> x ## aux_pointer;
+#    define DECLARE_P(x) UniquePtr<decltype(x), D<decltype(x)>> x ## aux_pointer;
 #    define PTRFROMREF(x) x ## aux_pointer.ptr()
-#    define INIT_P(x) x ## aux_pointer(&x, D())
+#    define INIT_P(x) x ## aux_pointer(&x, D<decltype(x)>())
 #else
 #    define DECLARE_P(x)
 #    define PTRFROMREF(x) ptrFromRef(m)
