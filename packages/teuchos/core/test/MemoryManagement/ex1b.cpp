@@ -24,13 +24,17 @@ struct D { // deleter
 };
 
 #ifdef DEBUG_MODE
-#    define DECLARE_P(x) UniquePtr<decltype(x), D<decltype(x)>> x ## aux_pointer;
-#    define DECLARE_P2(x) UniquePtr<decltype(x), D<decltype(x)>> x ## aux_pointer(&x, D<decltype(x)>());
-#    define PTRFROMREF(x) x ## aux_pointer.ptr()
-#    define INIT_P(x) x ## aux_pointer(&x, D<decltype(x)>())
+#    define AUX_P(x) x ## aux_pointer
+#    define INIT_COMMON_P(x) (&x, D<decltype(x)>())
+#    define DECLARE_COMMON_P(x) UniquePtr<decltype(x), D<decltype(x)>> AUX_P(x)
+
+#    define DECLARE_P(x) DECLARE_COMMON_P(x);
+#    define DECLARE_INIT_P(x) DECLARE_COMMON_P(x)INIT_COMMON_P(x);
+#    define PTRFROMREF(x) AUX_P(x).ptr()
+#    define INIT_P(x) AUX_P(x) INIT_COMMON_P(x)
 #else
 #    define DECLARE_P(x)
-#    define DECLARE_P2(x)
+#    define DECLARE_INIT_P(x)
 #    define PTRFROMREF(x) ptrFromRef(x)
 #    define INIT_P(x)
 #endif
@@ -83,7 +87,7 @@ int main() {
     Ptr<int> ip;
     {
         int i = 1;
-        DECLARE_P2(i)
+        DECLARE_INIT_P(i)
         ip = PTRFROMREF(i);
         std::cout << "i = " << *ip << std::endl; // OK
     }
