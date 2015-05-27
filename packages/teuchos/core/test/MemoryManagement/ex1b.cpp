@@ -25,10 +25,12 @@ struct D { // deleter
 
 #ifdef DEBUG_MODE
 #    define DECLARE_P(x) UniquePtr<decltype(x), D<decltype(x)>> x ## aux_pointer;
+#    define DECLARE_P2(x) UniquePtr<decltype(x), D<decltype(x)>> x ## aux_pointer(&x, D<decltype(x)>());
 #    define PTRFROMREF(x) x ## aux_pointer.ptr()
 #    define INIT_P(x) x ## aux_pointer(&x, D<decltype(x)>())
 #else
 #    define DECLARE_P(x)
+#    define DECLARE_P2(x)
 #    define PTRFROMREF(x) ptrFromRef(x)
 #    define INIT_P(x)
 #endif
@@ -78,6 +80,14 @@ std::ostream& operator<<(std::ostream& out, const std::map<int, int> &d)
 }
 
 int main() {
+    Ptr<int> ip;
+    {
+        int i = 1;
+        DECLARE_P2(i)
+        ip = PTRFROMREF(i);
+        std::cout << "i = " << *ip << std::endl; // OK
+    }
+    std::cout << "i = " << *ip << std::endl; // Dangling
     Ptr<std::map<int, int>> ap;
     {
         A a;
