@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <map>
+#include <list>
 
 #include "TeuchosCore_ConfigDefs.hpp"
 #include "Teuchos_UnitTestHarness.hpp"
@@ -43,17 +44,25 @@ class A {
 private:
     std::map<int, int> m;
     DECLARE_P(m)
+    std::list<int> l;
+    DECLARE_P(l)
 public:
     A()
 #ifdef DEBUG_MODE
-      : INIT_P(m)
+      : INIT_P(m)//, INIT_P(l)
 #endif
       { }
     void add(int a, int b) {
         m[a] = b;
     }
+    void add2(int a) {
+        l.push_back(a);
+    }
     Ptr<std::map<int, int>> get_access() {
         return PTRFROMREF(m);
+    }
+    Ptr<std::list<int>> get_access2() {
+        return PTRFROMREF(l);
     }
 };
 
