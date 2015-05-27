@@ -50,7 +50,7 @@ private:
 public:
     A()
 #ifdef DEBUG_MODE
-      : INIT_P(m)//, INIT_P(l)
+      : INIT_P(m), INIT_P(l)
 #endif
       { }
     void add(int a, int b) {
