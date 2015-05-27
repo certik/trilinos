@@ -84,6 +84,7 @@ std::ostream& operator<<(std::ostream& out, const std::map<int, int> &d)
 }
 
 int main() {
+    // Pointer to integer on stack
     Ptr<int> ip;
     {
         int i = 1;
@@ -92,6 +93,8 @@ int main() {
         std::cout << "i = " << *ip << std::endl; // OK
     }
     std::cout << "i = " << *ip << std::endl; // Dangling
+
+    // Pointer to std::map inside a class (also on stack)
     Ptr<std::map<int, int>> ap;
     {
         A a;
@@ -101,5 +104,6 @@ int main() {
         std::cout << "a = " << *ap << std::endl; // OK
     }
     std::cout << "a = " << *ap << std::endl; // Dangling
+
     return 0;
 }
