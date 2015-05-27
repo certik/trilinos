@@ -36,7 +36,7 @@ struct D { // deleter
 #    define INIT_P(x) x ## aux_pointer(&x, D<decltype(x)>())
 #else
 #    define DECLARE_P(x)
-#    define PTRFROMREF(x) ptrFromRef(m)
+#    define PTRFROMREF(x) ptrFromRef(x)
 #    define INIT_P(x)
 #endif
 
