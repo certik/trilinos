@@ -1,10 +1,3 @@
-/*
- * Compile and run with:
- *
- * g++ -Wall -Wextra -std=c++11 ex1b.cpp && ./a.out
- *
- */
-
 #include <iostream>
 #include <map>
 #include <list>
