@@ -64,9 +64,15 @@ public:
 #endif
           ), d_(d) { }
   ~UniquePtr();
+
   // Copy constructor and assignment are disabled
   inline UniquePtr(const UniquePtr<T>& ptr) = delete;
+  template<class U, class E>
+  inline UniquePtr(const UniquePtr<U, E>& ptr) = delete;
   UniquePtr<T>& operator=(const UniquePtr<T>& ptr) = delete;
+  template<class U, class E>
+  UniquePtr<T>& operator=(const UniquePtr<U, E>& ptr) = delete;
+
   // Move constructor and assignment
   inline UniquePtr(UniquePtr &&r_ptr) : ptr_(r_ptr.release()) { }
   template<class U, class E>
