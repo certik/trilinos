@@ -88,9 +88,12 @@ public:
 
   // Move constructor and assignment
   inline UniquePtr(UniquePtr &&r_ptr) : ptr_(r_ptr.release()),
-      d_(std::forward<Deleter>(r_ptr.d_)) { }
+      d_(std::forward<Deleter>(r_ptr.get_deleter())) { }
+
   template<class U, class E>
-  inline UniquePtr(UniquePtr<U, E> &&r_ptr) : ptr_(r_ptr.release()) { }
+  inline UniquePtr(UniquePtr<U, E> &&r_ptr) : ptr_(r_ptr.release()),
+      d_(std::forward<E>(r_ptr.get_deleter())) { }
+
   UniquePtr<T>& operator=(UniquePtr &&r_ptr) {
     std::swap(ptr_, r_ptr.ptr_);
     return *this;
@@ -121,6 +124,15 @@ public:
     ptr_ = null;
     return p;
   }
+
+  Deleter& get_deleter() noexcept {
+    return d_;
+  }
+
+  const Deleter& get_deleter() const noexcept {
+    return d_;
+  }
+
 private:
 #ifdef TEUCHOS_DEBUG
   RCP<T> ptr_;

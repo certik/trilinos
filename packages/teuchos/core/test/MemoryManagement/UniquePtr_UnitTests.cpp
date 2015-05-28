@@ -375,7 +375,9 @@ bool test_unique_ptr_interface()
     flags = 0;
     UPtr<Foo, D&> up6c(new Foo, d); // D is a reference
     if (flags != 0) return false;
+    flags = 0;
     UPtr<Foo, D> up6d(std::move(up6c)); // D is copied
+    if (flags != 3) return false;
   }
 
   // Test 10
