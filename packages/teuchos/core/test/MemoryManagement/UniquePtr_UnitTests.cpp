@@ -348,7 +348,9 @@ bool test_unique_ptr_interface()
 
   // Test 7
   {
+    flags = 0;
     UPtr<Foo, D> up4(new Foo, D()); // deleter moved
+    if (flags != 4) return false;
     if (up4.get() == nullptr) return false;
   }
 

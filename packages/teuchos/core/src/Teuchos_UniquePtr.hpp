@@ -56,13 +56,26 @@ template<class T, class Deleter=std::default_delete<T>>
 class UniquePtr {
 public:
   inline UniquePtr( ENull null_in = null );
+
   inline explicit UniquePtr( T *ptr_in ) : ptr_(ptr_in) { }
-  inline explicit UniquePtr( T *ptr_in, const Deleter &d)
+
+  inline UniquePtr( T *ptr_in,
+      typename std::conditional<std::is_reference<Deleter>::value,
+        Deleter, const Deleter&>::type d)
       : ptr_(ptr_in
 #ifdef TEUCHOS_DEBUG
           , deallocFunctorDelete<T, Deleter>(d), true
 #endif
           ), d_(d) { }
+
+  inline UniquePtr( T *ptr_in,
+      typename std::remove_reference<Deleter>::type &&d)
+      : ptr_(ptr_in
+#ifdef TEUCHOS_DEBUG
+          , deallocFunctorDelete<T, Deleter>(d), true
+#endif
+          ), d_(std::move(d)) { }
+
   ~UniquePtr();
 
   // Copy constructor and assignment are disabled
