@@ -87,7 +87,8 @@ public:
   UniquePtr<T>& operator=(const UniquePtr<U, E>& ptr) = delete;
 
   // Move constructor and assignment
-  inline UniquePtr(UniquePtr &&r_ptr) : ptr_(r_ptr.release()) { }
+  inline UniquePtr(UniquePtr &&r_ptr) : ptr_(r_ptr.release()),
+      d_(std::forward<Deleter>(r_ptr.d_)) { }
   template<class U, class E>
   inline UniquePtr(UniquePtr<U, E> &&r_ptr) : ptr_(r_ptr.release()) { }
   UniquePtr<T>& operator=(UniquePtr &&r_ptr) {
