@@ -279,11 +279,13 @@ struct Foo { // object to manage
   ~Foo() { } // ~Foo dtor TODO: test that it is called
 };
 
+int flags;
+
 struct D { // deleter
-  D() {}; // TODO: test that it is called
-  D(const D&) { } // D copy ctor TODO: test that it is called
-  D(D&) { } // D non-const copy ctor TODO: test that it is called
-  D(D&&) { } // D move ctor TODO: test that it is called
+  D() { flags = 1; };
+  D(const D&) { flags = 2; } // D copy ctor
+  D(D&) { flags = 3; } // D non-const copy ctor
+  D(D&&) { flags = 4; } // D move ctor
   void operator()(Foo* p) const {
     // D is deleting a Foo TODO: test that it is called
     delete p;
@@ -328,13 +330,19 @@ bool test_unique_ptr_interface()
   }
 
   // Test 6
+  flags = 0;
   D d;
+  if (flags != 1) return false;
   {
+    flags = 0;
     UPtr<Foo, D> up3(new Foo, d); // deleter copied
+    if (flags != 2) return false;
     if (up3.get() == nullptr) return false;
   }
   {
+    flags = 0;
     UPtr<Foo, D&> up3b(new Foo, d); // up3b holds a reference to d
+    if (flags != 0) return false;
     if (up3b.get() == nullptr) return false;
   }
 
