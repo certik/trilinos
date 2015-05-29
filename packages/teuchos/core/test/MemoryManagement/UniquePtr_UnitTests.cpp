@@ -294,7 +294,10 @@ struct D { // deleter
   };
 };
 
+// FIXME: Temporary macros --- we should figure out how to use TEST_ASSERT and
+// TEST_EQUALITY instead in the function below.
 #define TEST_ASSERT2(x) if (!(x)) return false
+#define TEST_EQUALITY2(a, b) TEST_ASSERT2((a) == (b))
 
 template <template <typename T, typename Deleter=std::default_delete<T>> class UPtr>
 bool test_unique_ptr_interface()
@@ -323,9 +326,9 @@ bool test_unique_ptr_interface()
 
   // Test 4
   UPtr<Foo> up1;
-  TEST_ASSERT2(up1.get() == nullptr);
+  TEST_EQUALITY2(up1.get(), nullptr);
   UPtr<Foo> up1b(nullptr);
-  TEST_ASSERT2(up1b.get() == nullptr);
+  TEST_EQUALITY2(up1b.get(), nullptr);
 
   // Test 5
   {
@@ -410,14 +413,14 @@ bool test_unique_ptr_interface()
     UPtr<Foo, D> up2;
     flags = 0;
     up2 = std::move(up);
-    TEST_ASSERT2(flags == 5);
+    TEST_EQUALITY2(flags, 5);
   }
 
   // Test 13
   {
     UPtr<Foo> up(new Foo());
     up.reset();
-    TEST_ASSERT2(up.get() == nullptr);
+    TEST_EQUALITY2(up.get(), nullptr);
   }
 
   // Success
