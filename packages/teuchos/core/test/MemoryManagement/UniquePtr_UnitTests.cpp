@@ -294,6 +294,8 @@ struct D { // deleter
   };
 };
 
+#define TEST_ASSERT2(x) if (!(x)) return false
+
 template <template <typename T, typename Deleter=std::default_delete<T>> class UPtr>
 bool test_unique_ptr_interface()
 {
@@ -408,7 +410,7 @@ bool test_unique_ptr_interface()
     UPtr<Foo, D> up2;
     flags = 0;
     up2 = std::move(up);
-    if (flags != 5) return false;
+    TEST_ASSERT2(flags == 5);
   }
 
   // Success
