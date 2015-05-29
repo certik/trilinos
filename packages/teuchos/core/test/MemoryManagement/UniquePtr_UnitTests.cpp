@@ -435,6 +435,17 @@ bool test_unique_ptr_interface()
     TEST_EQUALITY2(up.get(), nullptr);
   }
 
+  // Test 15
+  {
+    UPtr<Foo, D> up(new Foo(), D());
+    TEST_EQUALITY2(flags, 4);
+    TEST_INEQUALITY2(up.get(), nullptr);
+    up.reset(new Foo());
+    TEST_INEQUALITY2(up.get(), nullptr);
+    up.reset(nullptr);
+    TEST_EQUALITY2(up.get(), nullptr);
+  }
+
   // Success
   return true;
 }
