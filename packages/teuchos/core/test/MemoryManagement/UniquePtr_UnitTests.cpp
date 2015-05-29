@@ -340,52 +340,52 @@ bool test_unique_ptr_interface()
   // Test 6
   flags = 0;
   D d;
-  if (flags != 1) return false;
+  TEST_EQUALITY2(flags, 1);
   {
     flags = 0;
     UPtr<Foo, D> up3(new Foo, d); // deleter copied
-    if (flags != 2) return false;
-    if (up3.get() == nullptr) return false;
+    TEST_EQUALITY2(flags, 2);
+    TEST_INEQUALITY2(up3.get(),  nullptr);
   }
   {
     flags = 0;
     UPtr<Foo, D&> up3b(new Foo, d); // up3b holds a reference to d
-    if (flags != 0) return false;
-    if (up3b.get() == nullptr) return false;
+    TEST_EQUALITY2(flags, 0);
+    TEST_INEQUALITY2(up3b.get(), nullptr);
   }
 
   // Test 7
   {
     flags = 0;
     UPtr<Foo, D> up4(new Foo, D()); // deleter moved
-    if (flags != 4) return false;
-    if (up4.get() == nullptr) return false;
+    TEST_EQUALITY2(flags, 4);
+    TEST_INEQUALITY2(up4.get(), nullptr);
   }
 
   // Test 8
   {
     UPtr<Foo> up5a(new Foo);
-    if (up5a.get() == nullptr) return false;
+    TEST_INEQUALITY2(up5a.get(), nullptr);
     UPtr<Foo> up5b(std::move(up5a)); // ownership transfer
-    if (up5a.get() != nullptr) return false;
-    if (up5b.get() == nullptr) return false;
+    TEST_EQUALITY2(up5a.get(), nullptr);
+    TEST_INEQUALITY2(up5b.get(), nullptr);
   }
 
   // Test 9
   {
     flags = 0;
     UPtr<Foo, D> up6a(new Foo, d); // D is copied
-    if (flags != 2) return false;
+    TEST_EQUALITY2(flags, 2);
     flags = 0;
     UPtr<Foo, D> up6b(std::move(up6a)); // D is moved
-    if (flags != 4) return false;
+    TEST_EQUALITY2(flags, 4);
 
     flags = 0;
     UPtr<Foo, D&> up6c(new Foo, d); // D is a reference
-    if (flags != 0) return false;
+    TEST_EQUALITY2(flags, 0);
     flags = 0;
     UPtr<Foo, D> up6d(std::move(up6c)); // D is copied
-    if (flags != 3) return false;
+    TEST_EQUALITY2(flags, 3);
   }
 
   // Test 10
@@ -405,7 +405,7 @@ bool test_unique_ptr_interface()
     UPtr<Foo, D> up2;
     flags = 0;
     up2 = std::move(up);
-    if (flags != 6) return false;
+    TEST_EQUALITY2(flags, 6);
   }
 
   // Test 12
