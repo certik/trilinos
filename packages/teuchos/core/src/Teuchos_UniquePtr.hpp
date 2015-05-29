@@ -95,7 +95,8 @@ public:
       d_(std::forward<E>(r_ptr.get_deleter())) { }
 
   UniquePtr<T>& operator=(UniquePtr &&r_ptr) {
-    std::swap(ptr_, r_ptr.ptr_);
+    reset(r_ptr.release());
+    get_deleter() = std::forward<Deleter>(r_ptr.get_deleter());
     return *this;
   }
   inline T* operator->() const { return ptr_.operator->(); }
@@ -114,7 +115,7 @@ public:
   inline Ptr<const T> getConst() const;
 
   /** \brief Reset to null. */
-  inline void reset();
+  inline void reset(T *r_ptr=nullptr);
 
   inline T* release() {
     T *p = get();
@@ -204,13 +205,14 @@ Ptr<const T> UniquePtr<T, Deleter>::getConst() const
 
 template<class T, class Deleter>
 inline
-void UniquePtr<T, Deleter>::reset()
+void UniquePtr<T, Deleter>::reset(T *r_ptr)
 {
 #ifdef TEUCHOS_DEBUG
   ptr_.reset();
+  ptr_ = rcp(r_ptr);
 #else
   d_(ptr_.get()); // Note: the pointer can be null
-  ptr_ = null;
+  ptr_ = Ptr<T>(r_ptr);
 #endif
 }
 
