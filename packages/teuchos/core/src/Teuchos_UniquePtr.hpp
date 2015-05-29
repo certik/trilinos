@@ -94,7 +94,7 @@ public:
   inline UniquePtr(UniquePtr<U, E> &&r_ptr) : ptr_(r_ptr.release()),
       d_(std::forward<E>(r_ptr.get_deleter())) { }
 
-  UniquePtr<T>& operator=(UniquePtr &&r_ptr) {
+  UniquePtr& operator=(UniquePtr &&r_ptr) {
     reset(r_ptr.release());
     get_deleter() = std::forward<Deleter>(r_ptr.get_deleter());
     return *this;

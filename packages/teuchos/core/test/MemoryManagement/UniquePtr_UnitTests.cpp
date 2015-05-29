@@ -286,6 +286,8 @@ struct D { // deleter
   D(const D&) { flags = 2; } // D copy ctor
   D(D&) { flags = 3; } // D non-const copy ctor
   D(D&&) { flags = 4; } // D move ctor
+  void operator=(D &d) { flags = 5; }
+  void operator=(D &&d) { flags = 6; }
   void operator()(Foo* p) const {
     // D is deleting a Foo TODO: test that it is called
     delete p;
@@ -389,6 +391,15 @@ bool test_unique_ptr_interface()
       return false;
     }
     delete fp;
+  }
+
+  // Test 11
+  {
+    UPtr<Foo, D> up(new Foo(), d);
+    UPtr<Foo, D> up2;
+    flags = 0;
+    up2 = std::move(up);
+    if (flags != 6) return false;
   }
 
   // Success
