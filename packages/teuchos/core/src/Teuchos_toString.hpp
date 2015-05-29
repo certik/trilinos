@@ -47,6 +47,11 @@
 
 namespace Teuchos {
 
+inline
+std::ostream& operator<<(std::ostream& out, const std::nullptr_t)
+{
+  return (out << "nullptr");
+}
 
 /** \brief Default traits class for converting objects into strings.
  *
