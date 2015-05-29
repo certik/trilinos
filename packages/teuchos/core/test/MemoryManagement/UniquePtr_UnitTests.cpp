@@ -316,10 +316,10 @@ bool test_unique_ptr_interface()
   int x2 = 5;
   auto del2 = [&deleted](int * p) { deleted = true; };
   {
-    if (deleted) return false;
+    TEST_ASSERT2(!deleted);
     UPtr<int, decltype(del2)> px2(&x2, del2);
   }
-  if (!deleted) return false;
+  TEST_ASSERT2(deleted);
 
   // Test 4
   UPtr<Foo> up1;
@@ -411,6 +411,13 @@ bool test_unique_ptr_interface()
     flags = 0;
     up2 = std::move(up);
     TEST_ASSERT2(flags == 5);
+  }
+
+  // Test 13
+  {
+    UPtr<Foo> up(new Foo());
+    up.reset();
+    TEST_ASSERT2(up.get() == nullptr);
   }
 
   // Success
