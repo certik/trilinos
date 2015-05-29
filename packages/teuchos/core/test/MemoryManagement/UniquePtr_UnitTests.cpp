@@ -301,6 +301,12 @@ struct D { // deleter
   };
 };
 
+struct D2 { // deleter
+  D2(int _val) : val(_val) { };
+  void operator()(Foo2* p) const { delete p; };
+  int val;
+};
+
 // FIXME: Temporary macros --- we should figure out how to use TEST_ASSERT,
 // TEST_EQUALITY and TEST_INEQUALITY instead in the function below.
 #define TEST_ASSERT2(x) if (!(x)) return false
@@ -477,6 +483,21 @@ bool test_unique_ptr_interface()
     up1.swap(up2);
     TEST_EQUALITY2(up1->val, 2);
     TEST_EQUALITY2(up2->val, 1);
+  }
+
+  // Test 17
+  {
+    UPtr<Foo2, D2> up1(new Foo2(1), D2(1));
+    UPtr<Foo2, D2> up2(new Foo2(2), D2(2));
+    TEST_EQUALITY2(up1->val, 1);
+    TEST_EQUALITY2(up2->val, 2);
+    TEST_EQUALITY2(up1.get_deleter().val, 1);
+    TEST_EQUALITY2(up2.get_deleter().val, 2);
+    up1.swap(up2);
+    TEST_EQUALITY2(up1->val, 2);
+    TEST_EQUALITY2(up2->val, 1);
+    TEST_EQUALITY2(up1.get_deleter().val, 2);
+    TEST_EQUALITY2(up2.get_deleter().val, 1);
   }
 
   // Success
