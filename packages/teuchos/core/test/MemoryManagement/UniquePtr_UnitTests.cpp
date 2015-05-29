@@ -445,7 +445,7 @@ bool test_unique_ptr_interface()
     flags = 0;
     flags2 = 0;
     up.reset(new Foo());
-//    TEST_EQUALITY2(flags, 0);
+//    TEST_EQUALITY2(flags, 0); // Works in Release, fails in Debug mode
     TEST_EQUALITY2(flags2, 7);
     TEST_INEQUALITY2(up.get(), nullptr);
     flags2 = 0;
