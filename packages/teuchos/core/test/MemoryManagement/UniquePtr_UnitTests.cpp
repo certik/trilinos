@@ -420,7 +420,18 @@ bool test_unique_ptr_interface()
   // Test 13
   {
     UPtr<Foo> up(new Foo());
+    TEST_INEQUALITY2(up.get(), nullptr);
     up.reset();
+    TEST_EQUALITY2(up.get(), nullptr);
+  }
+
+  // Test 14
+  {
+    UPtr<Foo> up(new Foo());
+    TEST_INEQUALITY2(up.get(), nullptr);
+    up.reset(new Foo());
+    TEST_INEQUALITY2(up.get(), nullptr);
+    up.reset(nullptr);
     TEST_EQUALITY2(up.get(), nullptr);
   }
 
