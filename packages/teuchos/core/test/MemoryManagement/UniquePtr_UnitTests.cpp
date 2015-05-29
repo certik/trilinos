@@ -402,6 +402,15 @@ bool test_unique_ptr_interface()
     if (flags != 6) return false;
   }
 
+  // Test 12
+  {
+    UPtr<Foo, D&> up(new Foo(), d);
+    UPtr<Foo, D> up2;
+    flags = 0;
+    up2 = std::move(up);
+    if (flags != 5) return false;
+  }
+
   // Success
   return true;
 }

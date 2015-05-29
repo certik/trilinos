@@ -99,6 +99,14 @@ public:
     get_deleter() = std::forward<Deleter>(r_ptr.get_deleter());
     return *this;
   }
+
+  template<class U, class E>
+  UniquePtr& operator=(UniquePtr<U, E> &&r_ptr) {
+    reset(r_ptr.release());
+    get_deleter() = std::forward<E>(r_ptr.get_deleter());
+    return *this;
+  }
+
   inline T* operator->() const { return ptr_.operator->(); }
   inline T& operator*() const { return ptr_.operator*(); }
 
