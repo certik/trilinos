@@ -217,7 +217,7 @@ void UniquePtr<T, Deleter>::reset(T *r_ptr)
 {
 #ifdef TEUCHOS_DEBUG
   ptr_.reset();
-  ptr_ = rcp(r_ptr);
+  ptr_ = rcpWithDealloc(r_ptr, deallocFunctorDelete<T, Deleter>(d_));
 #else
   d_(ptr_.get()); // Note: the pointer can be null
   ptr_ = Ptr<T>(r_ptr);
