@@ -323,9 +323,9 @@ bool test_unique_ptr_interface()
 
   // Test 4
   UPtr<Foo> up1;
-  if (up1.get() != nullptr) return false;
+  TEST_ASSERT2(up1.get() == nullptr);
   UPtr<Foo> up1b(nullptr);
-  if (up1b.get() != nullptr) return false;
+  TEST_ASSERT2(up1b.get() == nullptr);
 
   // Test 5
   {
