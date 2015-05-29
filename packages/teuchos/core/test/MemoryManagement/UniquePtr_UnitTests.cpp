@@ -279,7 +279,7 @@ struct Foo { // object to manage
   ~Foo() { } // ~Foo dtor TODO: test that it is called
 };
 
-int flags;
+int flags, flags2;
 
 struct D { // deleter
   D() { flags = 1; };
@@ -289,7 +289,8 @@ struct D { // deleter
   void operator=(D &d) { flags = 5; }
   void operator=(D &&d) { flags = 6; }
   void operator()(Foo* p) const {
-    // D is deleting a Foo TODO: test that it is called
+    // D is deleting a Foo
+    flags2 = 7;
     delete p;
   };
 };
@@ -437,11 +438,15 @@ bool test_unique_ptr_interface()
 
   // Test 15
   {
+    flags = 0;
     UPtr<Foo, D> up(new Foo(), D());
     TEST_EQUALITY2(flags, 4);
     TEST_INEQUALITY2(up.get(), nullptr);
+    flags = 0;
     up.reset(new Foo());
+    TEST_EQUALITY2(flags, 0);
     TEST_INEQUALITY2(up.get(), nullptr);
+    flags2 = 0;
     up.reset(nullptr);
     TEST_EQUALITY2(up.get(), nullptr);
   }
