@@ -406,8 +406,10 @@ bool test_unique_ptr_interface()
   // Test 10
   {
     UPtr<Foo> up(new Foo());
+    TEST_ASSERT2(up);
     Foo *fp = up.release();
     TEST_EQUALITY2(up.get(), nullptr);
+    TEST_ASSERT2(!(up));
     TEST_INEQUALITY2(fp, nullptr);
     delete fp;
   }

@@ -136,7 +136,9 @@ public:
     return d_;
   }
 
-  // FIXME: operator bool
+  explicit operator bool() const {
+    return get() != nullptr;
+  }
 
   /*
    *                   Dereferencing
