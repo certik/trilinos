@@ -107,20 +107,10 @@ public:
     return *this;
   }
 
-  inline T* operator->() const { return ptr_.operator->(); }
-  inline T& operator*() const { return ptr_.operator*(); }
 
-  /** \brief Get the raw C++ pointer to the underlying object. */
-  inline T* get() const;
-
-  /** \brief Get the raw C++ pointer to the underlying object. */
-  inline T* getRawPtr() const;
-
-  /** \brief Return a Ptr<T> version of *this. */
-  inline const Ptr<T> ptr() const;
-
-  /** \brief Return a Ptr<const T> version of *this. */
-  inline Ptr<const T> getConst() const;
+  /*
+   *                   Modifiers
+   */
 
   inline T* release() {
     T *p = get();
@@ -139,6 +129,13 @@ public:
     std::swap(get_deleter(), other.get_deleter());
   }
 
+  /*
+   *                   Observers
+   */
+
+  /** \brief Get the raw C++ pointer to the underlying object. */
+  inline T* get() const;
+
   Deleter& get_deleter() noexcept {
     return d_;
   }
@@ -146,6 +143,33 @@ public:
   const Deleter& get_deleter() const noexcept {
     return d_;
   }
+
+  // FIXME: operator bool
+
+  /*
+   *                   Dereferencing
+   */
+
+  inline T* operator->() const { return ptr_.operator->(); }
+  inline T& operator*() const { return ptr_.operator*(); }
+
+  /*
+   *                   Observers Ptr
+   */
+
+  /** \brief Return a Ptr<T> version of *this. */
+  inline const Ptr<T> ptr() const;
+
+  /** \brief Return a Ptr<const T> version of *this. */
+  inline Ptr<const T> getConst() const;
+
+  /*
+   *                   Teuchos compatibility methods
+   */
+
+  /** \brief Get the raw C++ pointer to the underlying object. */
+  inline T* getRawPtr() const;
+
 
 private:
 #ifdef TEUCHOS_DEBUG
