@@ -94,18 +94,10 @@ public:
   inline UniquePtr(UniquePtr<U, E> &&r_ptr) : ptr_(r_ptr.release()),
       d_(std::forward<E>(r_ptr.get_deleter())) { }
 
-  UniquePtr& operator=(UniquePtr &&r_ptr) {
-    reset(r_ptr.release());
-    get_deleter() = std::forward<Deleter>(r_ptr.get_deleter());
-    return *this;
-  }
+  inline UniquePtr& operator=(UniquePtr &&r_ptr);
 
   template<class U, class E>
-  UniquePtr& operator=(UniquePtr<U, E> &&r_ptr) {
-    reset(r_ptr.release());
-    get_deleter() = std::forward<E>(r_ptr.get_deleter());
-    return *this;
-  }
+  inline UniquePtr& operator=(UniquePtr<U, E> &&r_ptr);
 
 
   /*
@@ -217,6 +209,22 @@ template<class T, class Deleter>
 inline
 const Ptr<T> UniquePtr<T, Deleter>::ptr() const {
   return ptr_.ptr();
+}
+
+template<class T, class Deleter>
+inline
+UniquePtr<T, Deleter>& UniquePtr<T, Deleter>::operator=(UniquePtr<T, Deleter> &&r_ptr) {
+  reset(r_ptr.release());
+  get_deleter() = std::forward<Deleter>(r_ptr.get_deleter());
+  return *this;
+}
+
+template<class T, class Deleter>
+template<class U, class E>
+inline UniquePtr<T, Deleter>& UniquePtr<T, Deleter>::operator=(UniquePtr<U, E> &&r_ptr) {
+  reset(r_ptr.release());
+  get_deleter() = std::forward<E>(r_ptr.get_deleter());
+  return *this;
 }
 
 template<class T, class Deleter>
