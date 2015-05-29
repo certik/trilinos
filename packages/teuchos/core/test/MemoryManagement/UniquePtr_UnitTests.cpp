@@ -279,6 +279,12 @@ struct Foo { // object to manage
   ~Foo() { } // ~Foo dtor TODO: test that it is called
 };
 
+struct Foo2 {
+    Foo2(int _val) : val(_val) { }
+    int val;
+};
+
+
 int flags, flags2;
 
 struct D { // deleter
@@ -305,32 +311,40 @@ template <template <typename T, typename Deleter=std::default_delete<T>> class U
 bool test_unique_ptr_interface()
 {
   // Test 1
-  UPtr<A> p1(new A);
   {
-    UPtr<A> p2(std::move(p1));
-    p1 = std::move(p2);
+    UPtr<A> p1(new A);
+    {
+      UPtr<A> p2(std::move(p1));
+      p1 = std::move(p2);
+    }
   }
 
   // Test 2
-  int x1 = 5;
-  auto del1 = [](int * p) { std::cout << "Deleting x1, value is : " << *p << std::endl; };
-  UPtr<int, decltype(del1)> px1(&x1, del1);
+  {
+    int x1 = 5;
+    auto del1 = [](int * p) { std::cout << "Deleting x1, value is : " << *p << std::endl; };
+    UPtr<int, decltype(del1)> px1(&x1, del1);
+  }
 
   // Test 3
-  bool deleted = false;
-  int x2 = 5;
-  auto del2 = [&deleted](int * p) { deleted = true; };
   {
-    TEST_ASSERT2(!deleted);
-    UPtr<int, decltype(del2)> px2(&x2, del2);
+    bool deleted = false;
+    int x2 = 5;
+    auto del2 = [&deleted](int * p) { deleted = true; };
+    {
+      TEST_ASSERT2(!deleted);
+      UPtr<int, decltype(del2)> px2(&x2, del2);
+    }
+    TEST_ASSERT2(deleted);
   }
-  TEST_ASSERT2(deleted);
 
   // Test 4
-  UPtr<Foo> up1;
-  TEST_EQUALITY2(up1.get(), nullptr);
-  UPtr<Foo> up1b(nullptr);
-  TEST_EQUALITY2(up1b.get(), nullptr);
+  {
+    UPtr<Foo> up1;
+    TEST_EQUALITY2(up1.get(), nullptr);
+    UPtr<Foo> up1b(nullptr);
+    TEST_EQUALITY2(up1b.get(), nullptr);
+  }
 
   // Test 5
   {
@@ -450,6 +464,17 @@ bool test_unique_ptr_interface()
     up.reset(nullptr);
     TEST_EQUALITY2(up.get(), nullptr);
     TEST_EQUALITY2(flags2, 7);
+  }
+
+  // Test 16
+  {
+    UPtr<Foo2> up1(new Foo2(1));
+    UPtr<Foo2> up2(new Foo2(2));
+    TEST_EQUALITY2(up1->val, 1);
+    TEST_EQUALITY2(up2->val, 2);
+    up1.swap(up2);
+    TEST_EQUALITY2(up1->val, 2);
+    TEST_EQUALITY2(up2->val, 1);
   }
 
   // Success

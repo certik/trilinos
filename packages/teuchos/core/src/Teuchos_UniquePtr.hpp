@@ -122,9 +122,6 @@ public:
   /** \brief Return a Ptr<const T> version of *this. */
   inline Ptr<const T> getConst() const;
 
-  /** \brief Reset to null. */
-  inline void reset(T *r_ptr=nullptr);
-
   inline T* release() {
     T *p = get();
 #ifdef TEUCHOS_DEBUG
@@ -132,6 +129,14 @@ public:
 #endif
     ptr_ = null;
     return p;
+  }
+
+  /** \brief Reset to r_ptr (default: null). */
+  inline void reset(T *r_ptr=nullptr);
+
+  void swap(UniquePtr & other) noexcept {
+    std::swap(ptr_, other.ptr_);
+    std::swap(get_deleter(), other.get_deleter());
   }
 
   Deleter& get_deleter() noexcept {
