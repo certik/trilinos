@@ -307,14 +307,8 @@ struct D2 { // deleter
   int val;
 };
 
-// FIXME: Temporary macros --- we should figure out how to use TEST_ASSERT,
-// TEST_EQUALITY and TEST_INEQUALITY instead in the function below.
-#define TEST_ASSERT2(x) if (!(x)) return false
-#define TEST_EQUALITY2(a, b) TEST_ASSERT2((a) == (b))
-#define TEST_INEQUALITY2(a, b) TEST_ASSERT2((a) != (b))
-
 template <template <typename T, typename Deleter=std::default_delete<T>> class UPtr>
-bool test_unique_ptr_interface()
+void test_unique_ptr_interface(Teuchos::FancyOStream &out, bool &success)
 {
   // Test 1
   {
@@ -338,85 +332,85 @@ bool test_unique_ptr_interface()
     int x2 = 5;
     auto del2 = [&deleted](int * p) { deleted = true; };
     {
-      TEST_ASSERT2(!deleted);
+      TEST_ASSERT(!deleted);
       UPtr<int, decltype(del2)> px2(&x2, del2);
     }
-    TEST_ASSERT2(deleted);
+    TEST_ASSERT(deleted);
   }
 
   // Test 4
   {
     UPtr<Foo> up1;
-    TEST_EQUALITY2(up1.get(), nullptr);
+    TEST_EQUALITY(up1.get(), nullptr);
     UPtr<Foo> up1b(nullptr);
-    TEST_EQUALITY2(up1b.get(), nullptr);
+    TEST_EQUALITY(up1b.get(), nullptr);
   }
 
   // Test 5
   {
     UPtr<Foo> up2(new Foo);
-    TEST_INEQUALITY2(up2.get(), nullptr);
+    TEST_INEQUALITY(up2.get(), nullptr);
   }
 
   // Test 6
   flags = 0;
   D d;
-  TEST_EQUALITY2(flags, 1);
+  TEST_EQUALITY(flags, 1);
   {
     flags = 0;
     UPtr<Foo, D> up3(new Foo, d); // deleter copied
-    TEST_EQUALITY2(flags, 2);
-    TEST_INEQUALITY2(up3.get(),  nullptr);
+    TEST_EQUALITY(flags, 2);
+    TEST_INEQUALITY(up3.get(),  nullptr);
   }
   {
     flags = 0;
     UPtr<Foo, D&> up3b(new Foo, d); // up3b holds a reference to d
-    TEST_EQUALITY2(flags, 0);
-    TEST_INEQUALITY2(up3b.get(), nullptr);
+    TEST_EQUALITY(flags, 0);
+    TEST_INEQUALITY(up3b.get(), nullptr);
   }
 
   // Test 7
   {
     flags = 0;
     UPtr<Foo, D> up4(new Foo, D()); // deleter moved
-    TEST_EQUALITY2(flags, 4);
-    TEST_INEQUALITY2(up4.get(), nullptr);
+    TEST_EQUALITY(flags, 4);
+    TEST_INEQUALITY(up4.get(), nullptr);
   }
 
   // Test 8
   {
     UPtr<Foo> up5a(new Foo);
-    TEST_INEQUALITY2(up5a.get(), nullptr);
+    TEST_INEQUALITY(up5a.get(), nullptr);
     UPtr<Foo> up5b(std::move(up5a)); // ownership transfer
-    TEST_EQUALITY2(up5a.get(), nullptr);
-    TEST_INEQUALITY2(up5b.get(), nullptr);
+    TEST_EQUALITY(up5a.get(), nullptr);
+    TEST_INEQUALITY(up5b.get(), nullptr);
   }
 
   // Test 9
   {
     flags = 0;
     UPtr<Foo, D> up6a(new Foo, d); // D is copied
-    TEST_EQUALITY2(flags, 2);
+    TEST_EQUALITY(flags, 2);
     flags = 0;
     UPtr<Foo, D> up6b(std::move(up6a)); // D is moved
-    TEST_EQUALITY2(flags, 4);
+    TEST_EQUALITY(flags, 4);
 
     flags = 0;
     UPtr<Foo, D&> up6c(new Foo, d); // D is a reference
-    TEST_EQUALITY2(flags, 0);
+    TEST_EQUALITY(flags, 0);
     flags = 0;
     UPtr<Foo, D> up6d(std::move(up6c)); // D is copied
-    TEST_EQUALITY2(flags, 3);
+    TEST_EQUALITY(flags, 3);
   }
 
   // Test 10
   {
     UPtr<Foo> up(new Foo());
-    TEST_ASSERT2(up);
+    TEST_ASSERT(up);
     Foo *fp = up.release();
-    TEST_EQUALITY2(up.get(), nullptr);
-    TEST_ASSERT2(!(up));
-    TEST_INEQUALITY2(fp, nullptr);
+    TEST_EQUALITY(up.get(), nullptr);
+    TEST_ASSERT(!(up));
+    TEST_INEQUALITY(fp, nullptr);
     delete fp;
   }
 
@@ -426,7 +420,7 @@ bool test_unique_ptr_interface()
     UPtr<Foo, D> up2;
     flags = 0;
     up2 = std::move(up);
-    TEST_EQUALITY2(flags, 6);
+    TEST_EQUALITY(flags, 6);
   }
 
   // Test 12
@@ -435,79 +429,76 @@ bool test_unique_ptr_interface()
     UPtr<Foo, D> up2;
     flags = 0;
     up2 = std::move(up);
-    TEST_EQUALITY2(flags, 5);
+    TEST_EQUALITY(flags, 5);
   }
 
   // Test 13
   {
     UPtr<Foo> up(new Foo());
-    TEST_INEQUALITY2(up.get(), nullptr);
+    TEST_INEQUALITY(up.get(), nullptr);
     up.reset();
-    TEST_EQUALITY2(up.get(), nullptr);
+    TEST_EQUALITY(up.get(), nullptr);
   }
 
   // Test 14
   {
     UPtr<Foo> up(new Foo());
-    TEST_INEQUALITY2(up.get(), nullptr);
+    TEST_INEQUALITY(up.get(), nullptr);
     up.reset(new Foo());
-    TEST_INEQUALITY2(up.get(), nullptr);
+    TEST_INEQUALITY(up.get(), nullptr);
     up.reset(nullptr);
-    TEST_EQUALITY2(up.get(), nullptr);
+    TEST_EQUALITY(up.get(), nullptr);
   }
 
   // Test 15
   {
     flags = 0;
     UPtr<Foo, D> up(new Foo(), D());
-    TEST_EQUALITY2(flags, 4);
-    TEST_INEQUALITY2(up.get(), nullptr);
+    TEST_EQUALITY(flags, 4);
+    TEST_INEQUALITY(up.get(), nullptr);
     flags = 0;
     flags2 = 0;
     up.reset(new Foo());
-//    TEST_EQUALITY2(flags, 0); // Works in Release, fails in Debug mode
-    TEST_EQUALITY2(flags2, 7);
-    TEST_INEQUALITY2(up.get(), nullptr);
+//    TEST_EQUALITY(flags, 0); // Works in Release, fails in Debug mode
+    TEST_EQUALITY(flags2, 7);
+    TEST_INEQUALITY(up.get(), nullptr);
     flags2 = 0;
     up.reset(nullptr);
-    TEST_EQUALITY2(up.get(), nullptr);
-    TEST_EQUALITY2(flags2, 7);
+    TEST_EQUALITY(up.get(), nullptr);
+    TEST_EQUALITY(flags2, 7);
   }
 
   // Test 16
   {
     UPtr<Foo2> up1(new Foo2(1));
     UPtr<Foo2> up2(new Foo2(2));
-    TEST_EQUALITY2(up1->val, 1);
-    TEST_EQUALITY2(up2->val, 2);
+    TEST_EQUALITY(up1->val, 1);
+    TEST_EQUALITY(up2->val, 2);
     up1.swap(up2);
-    TEST_EQUALITY2(up1->val, 2);
-    TEST_EQUALITY2(up2->val, 1);
+    TEST_EQUALITY(up1->val, 2);
+    TEST_EQUALITY(up2->val, 1);
   }
 
   // Test 17
   {
     UPtr<Foo2, D2> up1(new Foo2(1), D2(1));
     UPtr<Foo2, D2> up2(new Foo2(2), D2(2));
-    TEST_EQUALITY2(up1->val, 1);
-    TEST_EQUALITY2(up2->val, 2);
-    TEST_EQUALITY2(up1.get_deleter().val, 1);
-    TEST_EQUALITY2(up2.get_deleter().val, 2);
+    TEST_EQUALITY(up1->val, 1);
+    TEST_EQUALITY(up2->val, 2);
+    TEST_EQUALITY(up1.get_deleter().val, 1);
+    TEST_EQUALITY(up2.get_deleter().val, 2);
     up1.swap(up2);
-    TEST_EQUALITY2(up1->val, 2);
-    TEST_EQUALITY2(up2->val, 1);
-    TEST_EQUALITY2(up1.get_deleter().val, 2);
-    TEST_EQUALITY2(up2.get_deleter().val, 1);
+    TEST_EQUALITY(up1->val, 2);
+    TEST_EQUALITY(up2->val, 1);
+    TEST_EQUALITY(up1.get_deleter().val, 2);
+    TEST_EQUALITY(up2.get_deleter().val, 1);
   }
-
-  // Success
-  return true;
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, std_unique_ptr_interface )
 {
-  TEST_ASSERT(test_unique_ptr_interface<std::unique_ptr>());
-  TEST_ASSERT(test_unique_ptr_interface<UniquePtr>());
+  test_unique_ptr_interface<std::unique_ptr>(out, success);
+  test_unique_ptr_interface<UniquePtr>(out, success);
   A *a;
   std::tuple<A*, std::default_delete<A>> t;
   int x = 5;
