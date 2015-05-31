@@ -171,6 +171,29 @@ Ptr<T2> uniqueptr_implicit_cast(const UniquePtr<T1, Deleter>& p1)
   return Ptr<T2>(p1.get()); // Will only compile if conversion is legal!
 }
 
+/** \brief Returns true if <tt>p.get()==NULL</tt>.
+ *
+ * \relates UniquePtr
+ */
+template<class T, class Deleter=std::default_delete<T>>
+inline
+bool is_null( const UniquePtr<T, Deleter> &p )
+{
+  return !bool(p);
+}
+
+/** \brief Returns true if <tt>p.get()!=NULL</tt>
+ *
+ * \relates UniquePtr
+ */
+template<class T, class Deleter=std::default_delete<T>>
+inline
+bool nonnull( const UniquePtr<T, Deleter> &p )
+{
+  return bool(p);
+}
+
+
 // --------------------------------
 // Implementation of UniquePtr
 
@@ -346,31 +369,6 @@ void UniquePtr<T, Deleter>::reset(T *r_ptr)
 #endif
 }
 
-//------------------------------------------------------
-// Non member functions
-
-
-/** \brief Returns true if <tt>p.get()==NULL</tt>.
- *
- * \relates UniquePtr
- */
-template<class T, class Deleter=std::default_delete<T>>
-inline
-bool is_null( const UniquePtr<T, Deleter> &p )
-{
-  return !bool(p);
-}
-
-/** \brief Returns true if <tt>p.get()!=NULL</tt>
- *
- * \relates UniquePtr
- */
-template<class T, class Deleter=std::default_delete<T>>
-inline
-bool nonnull( const UniquePtr<T, Deleter> &p )
-{
-  return bool(p);
-}
 
 #endif // HAVE_TEUCHOSCORE_CXX11
 
