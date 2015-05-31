@@ -57,24 +57,14 @@ class UniquePtr {
 public:
   inline UniquePtr( ENull null_in = null );
 
-  inline explicit UniquePtr( T *ptr_in ) : ptr_(ptr_in) { }
+  inline explicit UniquePtr( T *ptr_in );
 
   inline UniquePtr( T *ptr_in,
       typename std::conditional<std::is_reference<Deleter>::value,
-        Deleter, const Deleter&>::type d)
-      : ptr_(ptr_in
-#ifdef TEUCHOS_DEBUG
-          , deallocFunctorDelete<T, Deleter>(d), true
-#endif
-          ), d_(d) { }
+        Deleter, const Deleter&>::type d);
 
   inline UniquePtr( T *ptr_in,
-      typename std::remove_reference<Deleter>::type &&d)
-      : ptr_(ptr_in
-#ifdef TEUCHOS_DEBUG
-          , deallocFunctorDelete<T, Deleter>(d), true
-#endif
-          ), d_(std::move(d)) { }
+      typename std::remove_reference<Deleter>::type &&d);
 
   ~UniquePtr();
 
@@ -87,12 +77,10 @@ public:
   UniquePtr<T>& operator=(const UniquePtr<U, E>& ptr) = delete;
 
   // Move constructor and assignment
-  inline UniquePtr(UniquePtr &&r_ptr) : ptr_(r_ptr.release()),
-      d_(std::forward<Deleter>(r_ptr.get_deleter())) { }
+  inline UniquePtr(UniquePtr &&r_ptr);
 
   template<class U, class E>
-  inline UniquePtr(UniquePtr<U, E> &&r_ptr) : ptr_(r_ptr.release()),
-      d_(std::forward<E>(r_ptr.get_deleter())) { }
+  inline UniquePtr(UniquePtr<U, E> &&r_ptr);
 
   inline UniquePtr& operator=(UniquePtr &&r_ptr);
 
@@ -104,22 +92,12 @@ public:
    *                   Modifiers
    */
 
-  inline T* release() {
-    T *p = get();
-#ifdef TEUCHOS_DEBUG
-    ptr_.release(); // So that the next line does not delete the object
-#endif
-    ptr_ = null;
-    return p;
-  }
+  inline T* release();
 
   /** \brief Reset to r_ptr (default: null). */
   inline void reset(T *r_ptr=nullptr);
 
-  void swap(UniquePtr & other) noexcept {
-    std::swap(ptr_, other.ptr_);
-    std::swap(get_deleter(), other.get_deleter());
-  }
+  inline void swap(UniquePtr & other) noexcept;
 
   /*
    *                   Observers
@@ -128,24 +106,18 @@ public:
   /** \brief Get the raw C++ pointer to the underlying object. */
   inline T* get() const;
 
-  Deleter& get_deleter() noexcept {
-    return d_;
-  }
+  inline Deleter& get_deleter() noexcept;
 
-  const Deleter& get_deleter() const noexcept {
-    return d_;
-  }
+  inline const Deleter& get_deleter() const noexcept;
 
-  explicit operator bool() const {
-    return get() != nullptr;
-  }
+  inline explicit operator bool() const;
 
   /*
    *                   Dereferencing
    */
 
-  inline T* operator->() const { return ptr_.operator->(); }
-  inline T& operator*() const { return ptr_.operator*(); }
+  inline T* operator->() const;
+  inline T& operator*() const;
 
   /*
    *                   Observers Ptr
@@ -195,8 +167,33 @@ Ptr<T2> uniqueptr_implicit_cast(const UniquePtr<T1, Deleter>& p1)
 // Implementation of UniquePtr
 
 template<class T, class Deleter>
-UniquePtr<T, Deleter>::UniquePtr( ENull /*null_in*/ )
+inline UniquePtr<T, Deleter>::UniquePtr( ENull /*null_in*/ )
   : ptr_(0)
+{}
+
+template<class T, class Deleter>
+inline UniquePtr<T, Deleter>::UniquePtr( T *ptr_in ) : ptr_(ptr_in)
+{}
+
+template<class T, class Deleter>
+inline UniquePtr<T, Deleter>::UniquePtr( T *ptr_in,
+      typename std::conditional<std::is_reference<Deleter>::value,
+        Deleter, const Deleter&>::type d)
+  : ptr_(ptr_in
+#ifdef TEUCHOS_DEBUG
+        , deallocFunctorDelete<T, Deleter>(d), true
+#endif
+        ), d_(d)
+{}
+
+template<class T, class Deleter>
+inline UniquePtr<T, Deleter>::UniquePtr( T *ptr_in,
+    typename std::remove_reference<Deleter>::type &&d)
+  : ptr_(ptr_in
+#ifdef TEUCHOS_DEBUG
+        , deallocFunctorDelete<T, Deleter>(d), true
+#endif
+        ), d_(std::move(d))
 {}
 
 template<class T, class Deleter>
@@ -206,6 +203,17 @@ UniquePtr<T, Deleter>::~UniquePtr()
   d_(ptr_.get()); // Note: the pointer can be null
 #endif
 }
+
+template<class T, class Deleter>
+inline UniquePtr<T, Deleter>::UniquePtr(UniquePtr &&r_ptr)
+  : ptr_(r_ptr.release()), d_(std::forward<Deleter>(r_ptr.get_deleter()))
+{}
+
+template<class T, class Deleter>
+template<class U, class E>
+inline UniquePtr<T, Deleter>::UniquePtr(UniquePtr<U, E> &&r_ptr)
+  : ptr_(r_ptr.release()), d_(std::forward<E>(r_ptr.get_deleter()))
+{}
 
 template<class T, class Deleter>
 inline
@@ -230,10 +238,49 @@ inline UniquePtr<T, Deleter>& UniquePtr<T, Deleter>::operator=(UniquePtr<U, E> &
 }
 
 template<class T, class Deleter>
+inline T* UniquePtr<T, Deleter>::release()
+{
+  T *p = get();
+#ifdef TEUCHOS_DEBUG
+  ptr_.release(); // So that the next line does not delete the object
+#endif
+  ptr_ = null;
+  return p;
+}
+
+template<class T, class Deleter>
+inline void UniquePtr<T, Deleter>::swap(UniquePtr & other) noexcept
+{
+  std::swap(ptr_, other.ptr_);
+  std::swap(get_deleter(), other.get_deleter());
+}
+
+template<class T, class Deleter>
 inline
 T* UniquePtr<T, Deleter>::get() const
 {
   return ptr_.get();
+}
+
+template<class T, class Deleter>
+inline
+Deleter& UniquePtr<T, Deleter>::get_deleter() noexcept
+{
+  return d_;
+}
+
+template<class T, class Deleter>
+inline
+const Deleter& UniquePtr<T, Deleter>::get_deleter() const noexcept
+{
+  return d_;
+}
+
+template<class T, class Deleter>
+inline
+UniquePtr<T, Deleter>::operator bool() const
+{
+  return get() != nullptr;
 }
 
 template<class T, class Deleter>
@@ -248,6 +295,19 @@ inline
 Ptr<const T> UniquePtr<T, Deleter>::getConst() const
 {
   return uniqueptr_implicit_cast<const T>(*this);
+}
+
+template<class T, class Deleter>
+inline
+T* UniquePtr<T, Deleter>::operator->() const
+{
+  return ptr_.operator->();
+}
+
+template<class T, class Deleter>
+inline
+T& UniquePtr<T, Deleter>::operator*() const {
+  return ptr_.operator*();
 }
 
 template<class T, class Deleter>
