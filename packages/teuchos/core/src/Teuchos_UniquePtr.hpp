@@ -255,8 +255,7 @@ inline T* UniquePtr<T, Deleter>::release()
 template<class T, class Deleter>
 inline void UniquePtr<T, Deleter>::swap(UniquePtr & other) noexcept
 {
-  std::swap(std::get<0>(t_), std::get<0>(other.t_));
-  std::swap(get_deleter(), other.get_deleter());
+  std::swap(t_, other.t_);
 }
 
 template<class T, class Deleter>
