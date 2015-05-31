@@ -525,9 +525,9 @@ void test_unique_ptr_interface(Teuchos::FancyOStream &out, bool &success)
     // size, as long as the deleter does not have any member variables.
     TEST_EQUALITY(sizeof(up1), sizeof(p));
     TEST_EQUALITY(sizeof(up2), sizeof(p));
-    TEST_ASSERT(sizeof(up3) > sizeof(p)); // D2 contains a member variable
     TEST_EQUALITY(sizeof(up4), sizeof(p));
 #endif
+    TEST_ASSERT(sizeof(up3) > sizeof(p)); // D2 contains a member variable
   }
 }
 
