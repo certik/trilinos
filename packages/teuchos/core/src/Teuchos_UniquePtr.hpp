@@ -302,7 +302,7 @@ UniquePtr<T, Deleter>::operator bool() const
 template<class T, class Deleter>
 inline bool UniquePtr<T, Deleter>::is_null() const
 {
-  return get() == nullptr;
+  return !bool(*this);
 }
 
 template<class T, class Deleter>
@@ -358,7 +358,7 @@ template<class T, class Deleter=std::default_delete<T>>
 inline
 bool is_null( const UniquePtr<T, Deleter> &p )
 {
-  return p.get() == 0;
+  return !bool(p);
 }
 
 /** \brief Returns true if <tt>p.get()!=NULL</tt>
@@ -369,7 +369,7 @@ template<class T, class Deleter=std::default_delete<T>>
 inline
 bool nonnull( const UniquePtr<T, Deleter> &p )
 {
-  return p.get() != 0;
+  return bool(p);
 }
 
 #endif // HAVE_TEUCHOSCORE_CXX11
