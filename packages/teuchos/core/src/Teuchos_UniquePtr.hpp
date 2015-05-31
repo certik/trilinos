@@ -138,12 +138,15 @@ public:
 
 
 private:
+  typedef
 #ifdef TEUCHOS_DEBUG
-  RCP<T> ptr_;
+    RCP<T>
 #else
-  Ptr<T> ptr_;
+    Ptr<T>
 #endif
-  Deleter d_;
+      pointer;
+
+  std::tuple<pointer, Deleter> t_;
 };
 
 // -------------------------
@@ -168,57 +171,58 @@ Ptr<T2> uniqueptr_implicit_cast(const UniquePtr<T1, Deleter>& p1)
 
 template<class T, class Deleter>
 inline UniquePtr<T, Deleter>::UniquePtr( ENull /*null_in*/ )
-  : ptr_(0)
+  : t_(null, Deleter())
 {}
 
 template<class T, class Deleter>
-inline UniquePtr<T, Deleter>::UniquePtr( T *ptr_in ) : ptr_(ptr_in)
+inline UniquePtr<T, Deleter>::UniquePtr( T *ptr_in )
+  : t_(pointer(ptr_in), Deleter())
 {}
 
 template<class T, class Deleter>
 inline UniquePtr<T, Deleter>::UniquePtr( T *ptr_in,
       typename std::conditional<std::is_reference<Deleter>::value,
         Deleter, const Deleter&>::type d)
-  : ptr_(ptr_in
+  : t_(pointer(ptr_in
 #ifdef TEUCHOS_DEBUG
         , deallocFunctorDelete<T, Deleter>(d), true
 #endif
-        ), d_(d)
+        ), d)
 {}
 
 template<class T, class Deleter>
 inline UniquePtr<T, Deleter>::UniquePtr( T *ptr_in,
     typename std::remove_reference<Deleter>::type &&d)
-  : ptr_(ptr_in
+  : t_(pointer(ptr_in
 #ifdef TEUCHOS_DEBUG
         , deallocFunctorDelete<T, Deleter>(d), true
 #endif
-        ), d_(std::move(d))
+        ), std::move(d))
 {}
 
 template<class T, class Deleter>
 UniquePtr<T, Deleter>::~UniquePtr()
 {
 #ifndef TEUCHOS_DEBUG
-  d_(ptr_.get()); // Note: the pointer can be null
+  get_deleter()(std::get<0>(t_).get()); // Note: the pointer can be null
 #endif
 }
 
 template<class T, class Deleter>
 inline UniquePtr<T, Deleter>::UniquePtr(UniquePtr &&r_ptr)
-  : ptr_(r_ptr.release()), d_(std::forward<Deleter>(r_ptr.get_deleter()))
+  : t_(pointer(r_ptr.release()), std::forward<Deleter>(r_ptr.get_deleter()))
 {}
 
 template<class T, class Deleter>
 template<class U, class E>
 inline UniquePtr<T, Deleter>::UniquePtr(UniquePtr<U, E> &&r_ptr)
-  : ptr_(r_ptr.release()), d_(std::forward<E>(r_ptr.get_deleter()))
+  : t_(pointer(r_ptr.release()), std::forward<E>(r_ptr.get_deleter()))
 {}
 
 template<class T, class Deleter>
 inline
 const Ptr<T> UniquePtr<T, Deleter>::ptr() const {
-  return ptr_.ptr();
+  return std::get<0>(t_).ptr();
 }
 
 template<class T, class Deleter>
@@ -242,16 +246,16 @@ inline T* UniquePtr<T, Deleter>::release()
 {
   T *p = get();
 #ifdef TEUCHOS_DEBUG
-  ptr_.release(); // So that the next line does not delete the object
+  std::get<0>(t_).release(); // So that the next line does not delete the object
 #endif
-  ptr_ = null;
+  std::get<0>(t_) = null;
   return p;
 }
 
 template<class T, class Deleter>
 inline void UniquePtr<T, Deleter>::swap(UniquePtr & other) noexcept
 {
-  std::swap(ptr_, other.ptr_);
+  std::swap(std::get<0>(t_), std::get<0>(other.t_));
   std::swap(get_deleter(), other.get_deleter());
 }
 
@@ -259,21 +263,21 @@ template<class T, class Deleter>
 inline
 T* UniquePtr<T, Deleter>::get() const
 {
-  return ptr_.get();
+  return std::get<0>(t_).get();
 }
 
 template<class T, class Deleter>
 inline
 Deleter& UniquePtr<T, Deleter>::get_deleter() noexcept
 {
-  return d_;
+  return std::get<1>(t_);
 }
 
 template<class T, class Deleter>
 inline
 const Deleter& UniquePtr<T, Deleter>::get_deleter() const noexcept
 {
-  return d_;
+  return std::get<1>(t_);
 }
 
 template<class T, class Deleter>
@@ -301,13 +305,13 @@ template<class T, class Deleter>
 inline
 T* UniquePtr<T, Deleter>::operator->() const
 {
-  return ptr_.operator->();
+  return std::get<0>(t_).operator->();
 }
 
 template<class T, class Deleter>
 inline
 T& UniquePtr<T, Deleter>::operator*() const {
-  return ptr_.operator*();
+  return std::get<0>(t_).operator*();
 }
 
 template<class T, class Deleter>
@@ -315,11 +319,12 @@ inline
 void UniquePtr<T, Deleter>::reset(T *r_ptr)
 {
 #ifdef TEUCHOS_DEBUG
-  ptr_.reset();
-  ptr_ = rcpWithDealloc(r_ptr, deallocFunctorDelete<T, Deleter>(d_));
+  std::get<0>(t_).reset();
+  std::get<0>(t_) = rcpWithDealloc(r_ptr, deallocFunctorDelete<T,
+      Deleter>(get_deleter()));
 #else
-  d_(ptr_.get()); // Note: the pointer can be null
-  ptr_ = Ptr<T>(r_ptr);
+  get_deleter()(std::get<0>(t_).get()); // Note: the pointer can be null
+  std::get<0>(t_) = Ptr<T>(r_ptr);
 #endif
 }
 
