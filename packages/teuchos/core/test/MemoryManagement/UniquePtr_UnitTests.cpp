@@ -83,6 +83,7 @@ TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_null )
   UniquePtr<A> a_uptr;
   a_uptr = std::move(a_uptr);
   TEST_ASSERT(is_null(a_uptr));
+  TEST_ASSERT(a_uptr.is_null());
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_nonnull )
@@ -91,6 +92,7 @@ TEUCHOS_UNIT_TEST( UniquePtr, assignSelf_nonnull )
   A *a_raw_ptr = a_uptr.getRawPtr();
   a_uptr = std::move(a_uptr);
   TEST_ASSERT(nonnull(a_uptr));
+  TEST_ASSERT(!a_uptr.is_null());
   TEST_EQUALITY(a_uptr.getRawPtr(), a_raw_ptr);
 }
 
@@ -110,6 +112,7 @@ TEUCHOS_UNIT_TEST( UniquePtr, assign2 )
   UniquePtr<A> a_uptr(new A);
   UniquePtr<A> b_uptr;
   TEST_ASSERT(nonnull(a_uptr));
+  TEST_ASSERT(!a_uptr.is_null());
   TEST_ASSERT(is_null(b_uptr));
   TEST_EQUALITY( a_uptr->A_f(), A_f_return );
   b_uptr = std::move(a_uptr);
@@ -223,6 +226,24 @@ TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr2 )
     ECHO(UniquePtr<A> a_uptr = uniqueptr(new A));
     ECHO(badPtr = a_uptr.getRawPtr());
     ECHO(a_ptr = a_uptr.ptr());
+    TEST_EQUALITY( a_ptr.getRawPtr(), badPtr );
+  }
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( *a_ptr, DanglingReferenceError );
+  (void)badPtr;
+#else
+  TEST_EQUALITY( a_ptr.getRawPtr(), badPtr );
+#endif
+}
+
+TEUCHOS_UNIT_TEST( UniquePtr, danglingPtr2b )
+{
+  ECHO(Ptr<A> a_ptr);
+  ECHO(A *badPtr = 0);
+  {
+    ECHO(UniquePtr<A> a_uptr = uniqueptr(new A));
+    ECHO(badPtr = a_uptr.getRawPtr());
+    ECHO(a_ptr = a_uptr());
     TEST_EQUALITY( a_ptr.getRawPtr(), badPtr );
   }
 #ifdef TEUCHOS_DEBUG

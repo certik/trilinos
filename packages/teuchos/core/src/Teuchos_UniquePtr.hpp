@@ -124,10 +124,13 @@ public:
    */
 
   /** \brief Return a Ptr<T> version of *this. */
-  inline const Ptr<T> ptr() const;
+  inline Ptr<T> ptr() const;
 
   /** \brief Return a Ptr<const T> version of *this. */
   inline Ptr<const T> getConst() const;
+
+  /** \brief Shorthand for ptr(). */
+  inline Ptr<T> operator()() const;
 
   /*
    *                   Teuchos compatibility methods
@@ -136,6 +139,8 @@ public:
   /** \brief Get the raw C++ pointer to the underlying object. */
   inline T* getRawPtr() const;
 
+  /** \brief Returns true if the underlying pointer is null. */
+  inline bool is_null() const;
 
 private:
   typedef
@@ -221,8 +226,16 @@ inline UniquePtr<T, Deleter>::UniquePtr(UniquePtr<U, E> &&r_ptr)
 
 template<class T, class Deleter>
 inline
-const Ptr<T> UniquePtr<T, Deleter>::ptr() const {
+Ptr<T> UniquePtr<T, Deleter>::ptr() const
+{
   return std::get<0>(t_).ptr();
+}
+
+template<class T, class Deleter>
+inline
+Ptr<T> UniquePtr<T, Deleter>::operator()() const
+{
+  return ptr();
 }
 
 template<class T, class Deleter>
@@ -284,6 +297,12 @@ inline
 UniquePtr<T, Deleter>::operator bool() const
 {
   return get() != nullptr;
+}
+
+template<class T, class Deleter>
+inline bool UniquePtr<T, Deleter>::is_null() const
+{
+  return get() == nullptr;
 }
 
 template<class T, class Deleter>
