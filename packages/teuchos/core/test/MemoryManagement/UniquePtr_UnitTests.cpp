@@ -493,6 +493,24 @@ void test_unique_ptr_interface(Teuchos::FancyOStream &out, bool &success)
     TEST_EQUALITY(up1.get_deleter().val, 2);
     TEST_EQUALITY(up2.get_deleter().val, 1);
   }
+
+  // Test 18
+  {
+    UniquePtr<A> a_uptr1 = uniqueptr(new A);
+    UniquePtr<A> a_uptr2 = uniqueptr(new A);
+    int a_f_return1 = -1;
+    int a_f_return2 = -1;
+    UniquePtr<Get_A_f_return> af_uptr1 = uniqueptr(
+        new Get_A_f_return(a_uptr1.get(), &a_f_return1));
+    UniquePtr<Get_A_f_return> af_uptr2 = uniqueptr(
+        new Get_A_f_return(a_uptr2.get(), &a_f_return2));
+    TEST_INEQUALITY( a_f_return1, A_f_return );
+    TEST_INEQUALITY( a_f_return2, A_f_return );
+    af_uptr1 = std::move(af_uptr2);
+    TEST_EQUALITY( a_f_return1, A_f_return );
+    TEST_INEQUALITY( a_f_return2, A_f_return );
+    TEST_ASSERT(is_null(af_uptr2));
+  }
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, std_unique_ptr_interface )
