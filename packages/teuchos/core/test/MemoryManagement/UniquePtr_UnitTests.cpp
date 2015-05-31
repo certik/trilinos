@@ -511,6 +511,24 @@ void test_unique_ptr_interface(Teuchos::FancyOStream &out, bool &success)
     TEST_INEQUALITY( a_f_return2, A_f_return );
     TEST_ASSERT(is_null(af_uptr2));
   }
+
+  // Test 19
+  {
+    Foo *p;
+    UPtr<Foo> up1(new Foo());
+    UPtr<Foo, D> up2(new Foo(), D());
+    UPtr<Foo2, D2> up3(new Foo2(1), D2(1));
+    auto del = [](Foo *p_) { std::cout << "Deleting Foo"; };
+    UPtr<Foo, decltype(del)> up4(new Foo(), del);
+#ifndef TEUCHOS_DEBUG
+    // In Release mode, the size of UniquePtr must be equal to the raw pointer
+    // size, as long as the deleter does not have any member variables.
+    TEST_EQUALITY(sizeof(up1), sizeof(p));
+    TEST_EQUALITY(sizeof(up2), sizeof(p));
+    TEST_ASSERT(sizeof(up3) > sizeof(p)); // D2 contains a member variable
+    TEST_EQUALITY(sizeof(up4), sizeof(p));
+#endif
+  }
 }
 
 TEUCHOS_UNIT_TEST( UniquePtr, std_unique_ptr_interface )
