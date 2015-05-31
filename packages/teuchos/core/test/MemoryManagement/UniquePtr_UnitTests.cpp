@@ -535,23 +535,6 @@ TEUCHOS_UNIT_TEST( UniquePtr, std_unique_ptr_interface )
 {
   test_unique_ptr_interface<std::unique_ptr>(out, success);
   test_unique_ptr_interface<UniquePtr>(out, success);
-  A *a;
-  std::tuple<A*, std::default_delete<A>> t;
-  std::tuple<Ptr<A>, std::default_delete<A>, int> t2;
-  int x = 5;
-  auto del = [](int * p) { std::cout << "Deleting x, value is : " << *p; };
-  std::unique_ptr<int, decltype(del)> px(&x, del);
-  std::cout << "SIZE: " << sizeof(std::default_delete<A>) << std::endl;
-  std::cout << "SIZE: " << sizeof(std::unique_ptr<A>) << std::endl;
-  std::cout << "SIZE: " << sizeof(UniquePtr<A>) << std::endl;
-  std::cout << "SIZE: " << sizeof(Ptr<A>) << std::endl;
-  std::cout << "SIZE: " << sizeof(a) << std::endl;
-  std::cout << "SIZE: " << sizeof(t) << std::endl;
-  std::cout << "SIZE: " << sizeof(t2) << std::endl;
-  std::cout << "SIZE: " << sizeof(px) << std::endl;
-  std::cout << "XX: " << &std::get<0>(t2) << std::endl;
-  std::cout << "XX: " << &std::get<1>(t2) << std::endl;
-  std::cout << "XX: " << &std::get<2>(t2) << std::endl;
 }
 
 #endif // HAVE_TEUCHOSCORE_CXX11
