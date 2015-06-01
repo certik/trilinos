@@ -480,7 +480,12 @@ void test_unique_ptr_interface(Teuchos::FancyOStream &out, bool &success)
     flags = 0;
     flags2 = 0;
     up.reset(new Foo());
-//    TEST_EQUALITY(flags, 0); // Works in Release, fails in Debug mode
+#ifndef TEUCHOS_DEBUG
+    // Works in Release, fails in Debug mode, because we need to initialize the
+    // deallocator for RCP again in the reset() function. So we only test this
+    // in the Release mode.
+    TEST_EQUALITY(flags, 0);
+#endif
     TEST_EQUALITY(flags2, 7);
     TEST_INEQUALITY(up.get(), nullptr);
     flags2 = 0;
