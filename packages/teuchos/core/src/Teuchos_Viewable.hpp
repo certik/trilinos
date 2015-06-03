@@ -60,7 +60,7 @@ public:
 #ifdef TEUCHOS_DEBUG
       uptr_(new T(args...))
 #else
-      m_(args)
+      m_(args...)
 #endif
     {}
 
@@ -76,7 +76,9 @@ public:
 #ifdef TEUCHOS_DEBUG
     return uptr_.ptr();
 #else
-    return Teuchos::ptrFromRef(m_);
+    // FIXME: this is a hack, do it properly:
+    T *p = const_cast<T*>(&m_);
+    return Ptr<T>(p);
 #endif
   }
 
