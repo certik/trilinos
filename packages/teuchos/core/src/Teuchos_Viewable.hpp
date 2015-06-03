@@ -64,7 +64,7 @@ public:
 #endif
     {}
 
-  Ptr<T> cptr() {
+  Ptr<const T> cptr() {
 #ifdef TEUCHOS_DEBUG
     return uptr_.ptr();
 #else

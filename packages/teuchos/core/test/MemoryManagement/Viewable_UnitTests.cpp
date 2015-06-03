@@ -102,6 +102,35 @@ TEUCHOS_UNIT_TEST( Viewable, Dangling2 )
 #endif
 }
 
+class A {
+private:
+  Viewable<std::map<int, int>> m_;
+public:
+  A(std::map<int, int> &&m) : m_(std::move(m)) {}
+
+  Ptr<std::map<int, int>> get_access() {
+    return m_.ptr();
+  }
+
+/*  Ptr<const std::map<int, int>> get_access() const {
+    return m_.cptr();
+  }
+*/
+
+  void someFunc1(std::map<int, int> &d) {
+  }
+  void someFunc2(const std::map<int, int> &d) {
+  }
+
+  void someOtherFunc()
+  {
+    someFunc1(*m_);  // T&
+//    ...
+    someFunc2(*m_);  // const T&
+//    ...
+  }
+};
+
 #endif // HAVE_TEUCHOSCORE_CXX11
 
 
