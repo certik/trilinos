@@ -45,7 +45,7 @@
 
 
 #include "Teuchos_PtrDecl.hpp"
-#include "Teuchos_RCP.hpp"
+#include "Teuchos_UniquePtr.hpp"
 
 
 namespace Teuchos {
@@ -64,7 +64,7 @@ public:
 #endif
   }
 
-  Ptr<const T> ptr() const {
+  Ptr<T> ptr() const {
 #ifdef TEUCHOS_DEBUG
     return uptr_.ptr();
 #else
