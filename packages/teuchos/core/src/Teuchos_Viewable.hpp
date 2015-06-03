@@ -55,7 +55,6 @@ namespace Teuchos {
 template<class T>
 class Viewable {
 public:
-
   Ptr<T> cptr() {
 #ifdef TEUCHOS_DEBUG
     return uptr_.ptr();
@@ -88,9 +87,9 @@ public:
 #endif
   }
 
-  T& operator()() { return nonconstRef(); }
+  T& operator*() { return nonconstRef(); }
 
-  const T& operator()() const { return ref(); }
+  const T& operator*() const { return ref(); }
 
 private:
 #ifdef TEUCHOS_DEBUG

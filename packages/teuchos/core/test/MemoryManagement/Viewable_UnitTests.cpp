@@ -93,12 +93,12 @@ TEUCHOS_UNIT_TEST( Viewable, Dangling2 )
   Ptr<int> ip;
   {
     Viewable<int> i; // = 1;
-//    *i += 10;
+    *i += 10;
     ip = i.ptr();
-//    TEST_EQUALITY(*ip, 11);
+    TEST_EQUALITY(*ip, 11);
   }
 #ifdef TEUCHOS_DEBUG
-//  TEST_THROW( *ip, DanglingReferenceError );
+  TEST_THROW( *ip, DanglingReferenceError );
 #endif
 }
 
