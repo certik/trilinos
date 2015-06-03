@@ -55,6 +55,15 @@ namespace Teuchos {
 template<class T>
 class Viewable {
 public:
+  template <class... Args>
+  Viewable(Args&&... args) :
+#ifdef TEUCHOS_DEBUG
+      uptr_(new T(args...))
+#else
+      m_(args)
+#endif
+    {}
+
   Ptr<T> cptr() {
 #ifdef TEUCHOS_DEBUG
     return uptr_.ptr();
