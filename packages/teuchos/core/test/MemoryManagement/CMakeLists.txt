@@ -116,6 +116,7 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
     RCP_ForwardDeclUnitTests.cpp
     UniquePtr_UnitTests.cpp
     Ptr_UnitTests.cpp
+    Viewable_UnitTests.cpp
     Array_UnitTest_helpers.cpp
     Array_UnitTests.cpp
     ArrayView_UnitTests.cpp
