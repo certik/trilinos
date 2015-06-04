@@ -43,6 +43,7 @@
 #ifndef TEUCHOS_VIEWABLE_HPP
 #define TEUCHOS_VIEWABLE_HPP
 
+#include <type_traits>
 
 #include "Teuchos_PtrDecl.hpp"
 #include "Teuchos_UniquePtr.hpp"
@@ -55,40 +56,46 @@ namespace Teuchos {
 template<class T>
 class Viewable {
 public:
-  Viewable(const Viewable<T> &v) :
-#ifdef TEUCHOS_DEBUG
-      uptr_(new T(*v))
-#else
-      m_(v.m_)
-#endif
-    {}
+  Viewable() = default;
+  ~Viewable() = default;
 
-  Viewable(Viewable<T> &v) :
 #ifdef TEUCHOS_DEBUG
-      uptr_(new T(*v))
+  Viewable(const Viewable<T> &v) : uptr_(new T(*v)) {}
 #else
-      m_(v.m_)
+  Viewable(const Viewable<T> &v) = default;
 #endif
-    {}
 
+#ifdef TEUCHOS_DEBUG
   Viewable<T>& operator=(const Viewable<T>& v) {
-#ifdef TEUCHOS_DEBUG
       uptr_.reset(new T(*v));
-#else
-      m_ = v.m_;
-#endif
-    return *this;
+      return *this;
   }
+#else
+  Viewable<T>& operator=(const Viewable<T>& v) = default;
+#endif
 
   Viewable(Viewable<T> &&v) = default;
   Viewable<T>& operator=(Viewable<T>&& v) = default;
 
+  // The below variadic template makes the class not trivially copyable (it
+  // seems it must catch some kind of Viewable arguments), so instead we
+  // provide a specific Viewable(T&& arg) constructor below:
+  /*
   template <class... Args>
   Viewable(Args&&... args) :
 #ifdef TEUCHOS_DEBUG
       uptr_(new T(std::forward<Args>(args)...))
 #else
       m_(std::forward<Args>(args)...)
+#endif
+    {}
+    */
+
+  Viewable(T&& arg) :
+#ifdef TEUCHOS_DEBUG
+      uptr_(new T(std::forward<T>(arg)))
+#else
+      m_(std::forward<T>(arg))
 #endif
     {}
 
@@ -135,6 +142,10 @@ private:
   T m_;
 #endif
 };
+
+#ifndef TEUCHOS_DEBUG
+static_assert(std::is_pod<Viewable<int>>::value, "Viewable<int> is not a POD");
+#endif
 
 
 #endif // HAVE_TEUCHOSCORE_CXX11
