@@ -55,6 +55,40 @@ namespace Teuchos {
 template<class T>
 class Viewable {
 public:
+  Viewable(Viewable<T> &v) :
+#ifdef TEUCHOS_DEBUG
+      uptr_(new T(*v))
+#else
+      m_(v.m_)
+#endif
+    {}
+
+  Viewable<T>& operator=(const Viewable<T>& v) {
+#ifdef TEUCHOS_DEBUG
+      uptr_.reset(new T(*v));
+#else
+      m_ = v.m_;
+#endif
+    return *this;
+  }
+
+  Viewable(Viewable<T> &&v) :
+#ifdef TEUCHOS_DEBUG
+      uptr_(std::move(v.uptr_))
+#else
+      m_(std::move(v.m_))
+#endif
+    {}
+
+  Viewable<T>& operator=(Viewable<T>&& v) {
+#ifdef TEUCHOS_DEBUG
+      uptr_ = std::move(v.uptr_);
+#else
+      m_ = std::move(v.m_);
+#endif
+    return *this;
+  }
+
   template <class... Args>
   Viewable(Args&&... args) :
 #ifdef TEUCHOS_DEBUG

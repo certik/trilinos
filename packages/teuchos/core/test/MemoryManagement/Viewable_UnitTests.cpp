@@ -147,6 +147,66 @@ TEUCHOS_UNIT_TEST( Viewable, TestA )
 #endif
 }
 
+TEUCHOS_UNIT_TEST( Viewable, Copy )
+{
+  {
+    int i = 5;
+    int j = i;
+    TEST_EQUALITY(j, 5);
+  }
+  {
+    Viewable<int> i = 5;
+    Viewable<int> j = i;
+    TEST_EQUALITY(*j, 5);
+  }
+  {
+    Viewable<int> i = 5;
+    Viewable<int> j = std::move(i);
+    TEST_EQUALITY(*j, 5);
+  }
+  {
+    Viewable<int> i = 5;
+    Viewable<int> j;
+    j = i;
+    TEST_EQUALITY(*j, 5);
+  }
+  {
+    Viewable<int> i = 5;
+    Viewable<int> j;
+    j = std::move(i);
+    TEST_EQUALITY(*j, 5);
+  }
+}
+
+TEUCHOS_UNIT_TEST( Viewable, Containers )
+{
+  {
+    std::vector<Viewable<int>> v;
+    v.push_back(5);
+    TEST_EQUALITY(*(v[0]), 5);
+  }
+
+  {
+    std::vector<int> v1, v2;
+    v1.push_back(5);
+    TEST_EQUALITY(v1[0], 5);
+    v2 = v1;
+    TEST_EQUALITY(v1[0], 5);
+    TEST_EQUALITY(v2[0], 5);
+  }
+
+  /*
+  {
+    std::vector<Viewable<int>> v1, v2;
+    v1.push_back(5);
+    TEST_EQUALITY(*(v1[0]), 5);
+    v2 = v1;
+    TEST_EQUALITY(*(v1[0]), 5);
+    TEST_EQUALITY(*(v2[0]), 5);
+  }
+  */
+}
+
 #endif // HAVE_TEUCHOSCORE_CXX11
 
 
