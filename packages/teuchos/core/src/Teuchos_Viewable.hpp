@@ -116,4 +116,4 @@ private:
 
 } // namespace Teuchos
 
-#endif // TEUCHOS_PTR_HPP
+#endif // TEUCHOS_VIEWABLE_HPP
