@@ -58,9 +58,9 @@ public:
   template <class... Args>
   Viewable(Args&&... args) :
 #ifdef TEUCHOS_DEBUG
-      uptr_(new T(args...))
+      uptr_(new T(std::forward<Args>(args)...))
 #else
-      m_(args...)
+      m_(std::forward<Args>(args)...)
 #endif
     {}
 
