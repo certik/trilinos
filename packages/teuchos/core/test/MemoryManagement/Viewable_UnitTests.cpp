@@ -74,7 +74,7 @@ using Teuchos::Viewable;
 
 #ifdef HAVE_TEUCHOSCORE_CXX11
 
-// Raw pointers example with unsafe dangling pointers
+// Raw pointers example with an unsafe dangling pointer
 TEUCHOS_UNIT_TEST( Viewable, Dangling1 )
 {
   int *ip;
@@ -87,7 +87,7 @@ TEUCHOS_UNIT_TEST( Viewable, Dangling1 )
   // *ip is now dangling
 }
 
-// Viewable example with safe dangling pointers
+// Viewable example with a safe dangling pointer
 TEUCHOS_UNIT_TEST( Viewable, Dangling2 )
 {
   Ptr<int> ip;
@@ -129,6 +129,23 @@ public:
 //    ...
   }
 };
+
+TEUCHOS_UNIT_TEST( Viewable, TestA )
+{
+  std::map<int, int> d;
+  d[5] = 6;
+  d[7] = 8;
+  Ptr<const std::map<int, int>> pd;
+  {
+    A a(std::move(d));
+    pd = a.get_access();
+    TEST_EQUALITY(pd->at(5), 6);
+    TEST_EQUALITY(pd->at(7), 8);
+  }
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( *pd, DanglingReferenceError );
+#endif
+}
 
 #endif // HAVE_TEUCHOSCORE_CXX11
 
