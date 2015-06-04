@@ -135,6 +135,10 @@ public:
 
   const T& operator*() const { return ref(); }
 
+  T* operator->() { return ptr().get(); }
+
+  const T* operator->() const { return cptr().get(); }
+
 private:
 #ifdef TEUCHOS_DEBUG
   UniquePtr<T> uptr_;

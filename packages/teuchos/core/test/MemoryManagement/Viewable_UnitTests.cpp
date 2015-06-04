@@ -130,7 +130,15 @@ public:
   }
 };
 
-TEUCHOS_UNIT_TEST( Viewable, TestA )
+Viewable<A> getA()
+{
+  std::map<int, int> d;
+  d[5] = 6;
+  d[7] = 8;
+  return  A(std::move(d));
+}
+
+TEUCHOS_UNIT_TEST( Viewable, TestA1 )
 {
   std::map<int, int> d;
   d[5] = 6;
@@ -139,6 +147,20 @@ TEUCHOS_UNIT_TEST( Viewable, TestA )
   {
     A a(std::move(d));
     pd = a.get_access();
+    TEST_EQUALITY(pd->at(5), 6);
+    TEST_EQUALITY(pd->at(7), 8);
+  }
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( *pd, DanglingReferenceError );
+#endif
+}
+
+TEUCHOS_UNIT_TEST( Viewable, TestA2 )
+{
+  Ptr<const std::map<int, int>> pd;
+  {
+    Viewable<A> a = getA();
+    pd = a->get_access();
     TEST_EQUALITY(pd->at(5), 6);
     TEST_EQUALITY(pd->at(7), 8);
   }
