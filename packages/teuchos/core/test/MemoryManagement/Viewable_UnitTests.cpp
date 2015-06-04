@@ -203,6 +203,37 @@ TEUCHOS_UNIT_TEST( Viewable, Containers )
     TEST_EQUALITY(*(v1[0]), 5);
     TEST_EQUALITY(*(v2[0]), 5);
   }
+
+  {
+    std::vector<Viewable<int>> v1 = {1, 2, 3};
+    TEST_EQUALITY(*(v1[0]), 1);
+    TEST_EQUALITY(*(v1[1]), 2);
+    TEST_EQUALITY(*(v1[2]), 3);
+  }
+  Ptr<int> pi1, pi2;
+  {
+    std::vector<Viewable<int>> v1 = {1, 2};
+    pi1 = v1[0].ptr();
+    pi2 = v1[1].ptr();
+    TEST_EQUALITY(*pi1, 1);
+    TEST_EQUALITY(*pi2, 2);
+  }
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( *pi1, DanglingReferenceError );
+  TEST_THROW( *pi2, DanglingReferenceError );
+#endif
+
+  {
+    std::map<int, Viewable<int>> v1 = {{1, 2}, {3, 4}};
+    pi1 = v1[1].ptr();
+    pi2 = v1[3].ptr();
+    TEST_EQUALITY(*pi1, 2);
+    TEST_EQUALITY(*pi2, 4);
+  }
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( *pi1, DanglingReferenceError );
+  TEST_THROW( *pi2, DanglingReferenceError );
+#endif
 }
 
 #endif // HAVE_TEUCHOSCORE_CXX11
