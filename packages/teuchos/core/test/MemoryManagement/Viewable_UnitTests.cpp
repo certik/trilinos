@@ -158,14 +158,78 @@ TEUCHOS_UNIT_TEST( Viewable, TestA1 )
 TEUCHOS_UNIT_TEST( Viewable, TestA2 )
 {
   Ptr<const std::map<int, int>> pd;
+  Ptr<const A> pa;
   {
     Viewable<A> a = getA();
     pd = a->get_access();
     TEST_EQUALITY(pd->at(5), 6);
     TEST_EQUALITY(pd->at(7), 8);
+    pa = a.cptr();
   }
 #ifdef TEUCHOS_DEBUG
   TEST_THROW( *pd, DanglingReferenceError );
+  TEST_THROW( *pa, DanglingReferenceError );
+#endif
+}
+
+class B {
+private:
+  Viewable<std::map<int, int>> m_;
+public:
+  B(std::map<int, int> &&m) : m_(std::move(m)) {}
+  ~B() = default;
+
+  B(B&& v) : m_(std::move(v.m_)) {}
+  B& operator=(B&& v) { m_ = std::move(v.m_); return *this; }
+
+  // Forbid copying of B
+  B& operator=(const B& v) = delete;
+  B(const B &v) = delete;
+
+  Ptr<std::map<int, int>> get_access() {
+    return m_.ptr();
+  }
+
+  Ptr<const std::map<int, int>> get_access() const {
+    return m_.cptr();
+  }
+
+  void someFunc1(std::map<int, int> &d) {
+  }
+  void someFunc2(const std::map<int, int> &d) {
+  }
+
+  void someOtherFunc()
+  {
+    someFunc1(*m_);  // T&
+//    ...
+    someFunc2(*m_);  // const T&
+//    ...
+  }
+};
+
+Viewable<B> getB()
+{
+  std::map<int, int> d;
+  d[5] = 6;
+  d[7] = 8;
+  return  B(std::move(d));
+}
+
+TEUCHOS_UNIT_TEST( Viewable, TestB )
+{
+  Ptr<const std::map<int, int>> pd;
+  Ptr<const B> pb;
+  {
+    Viewable<B> b = getB();
+    pd = b->get_access();
+    TEST_EQUALITY(pd->at(5), 6);
+    TEST_EQUALITY(pd->at(7), 8);
+    pb = b.cptr();
+  }
+#ifdef TEUCHOS_DEBUG
+  TEST_THROW( *pd, DanglingReferenceError );
+  TEST_THROW( *pb, DanglingReferenceError );
 #endif
 }
 
