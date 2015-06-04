@@ -112,10 +112,9 @@ public:
     return m_.ptr();
   }
 
-/*  Ptr<const std::map<int, int>> get_access() const {
+  Ptr<const std::map<int, int>> get_access() const {
     return m_.cptr();
   }
-*/
 
   void someFunc1(std::map<int, int> &d) {
   }
