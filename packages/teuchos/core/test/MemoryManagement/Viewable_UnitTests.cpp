@@ -195,7 +195,6 @@ TEUCHOS_UNIT_TEST( Viewable, Containers )
     TEST_EQUALITY(v2[0], 5);
   }
 
-  /*
   {
     std::vector<Viewable<int>> v1, v2;
     v1.push_back(5);
@@ -204,7 +203,6 @@ TEUCHOS_UNIT_TEST( Viewable, Containers )
     TEST_EQUALITY(*(v1[0]), 5);
     TEST_EQUALITY(*(v2[0]), 5);
   }
-  */
 }
 
 #endif // HAVE_TEUCHOSCORE_CXX11
