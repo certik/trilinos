@@ -72,22 +72,8 @@ public:
     return *this;
   }
 
-  Viewable(Viewable<T> &&v) :
-#ifdef TEUCHOS_DEBUG
-      uptr_(std::move(v.uptr_))
-#else
-      m_(std::move(v.m_))
-#endif
-    {}
-
-  Viewable<T>& operator=(Viewable<T>&& v) {
-#ifdef TEUCHOS_DEBUG
-      uptr_ = std::move(v.uptr_);
-#else
-      m_ = std::move(v.m_);
-#endif
-    return *this;
-  }
+  Viewable(Viewable<T> &&v) = default;
+  Viewable<T>& operator=(Viewable<T>&& v) = default;
 
   template <class... Args>
   Viewable(Args&&... args) :
