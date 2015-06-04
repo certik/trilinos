@@ -72,13 +72,11 @@ public:
 #endif
   }
 
-  Ptr<T> ptr() const {
+  Ptr<T> ptr() {
 #ifdef TEUCHOS_DEBUG
     return uptr_.ptr();
 #else
-    // FIXME: this is a hack, do it properly:
-    T *p = const_cast<T*>(&m_);
-    return Ptr<T>(p);
+    return Teuchos::ptrFromRef(m_);
 #endif
   }
 
