@@ -47,6 +47,13 @@
 
 namespace Teuchos {
 
+#ifdef HAVE_TEUCHOSCORE_CXX11
+inline
+std::ostream& operator<<(std::ostream& out, const std::nullptr_t)
+{
+  return (out << "nullptr");
+}
+#endif
 
 /** \brief Default traits class for converting objects into strings.
  *
