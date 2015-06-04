@@ -375,4 +375,4 @@ void UniquePtr<T, Deleter>::reset(T *r_ptr)
 
 } // namespace Teuchos
 
-#endif // TEUCHOS_PTR_HPP
+#endif // TEUCHOS_UNIQUEPTR_HPP
