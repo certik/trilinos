@@ -145,6 +145,7 @@ private:
 
 #ifndef TEUCHOS_DEBUG
 static_assert(std::is_pod<Viewable<int>>::value, "Viewable<int> is not a POD");
+static_assert(sizeof(Viewable<int>) == sizeof(int), "Viewable<int> has incorrect size");
 #endif
 
 
